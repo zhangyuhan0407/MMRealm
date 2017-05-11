@@ -79,8 +79,7 @@ class MMUserManager {
         do {
             try MMUserDAO.sharedInstance.save(user)
         } catch {
-            //zyh!!
-            Logger.error("")
+            fatalError()
         }
     }
     

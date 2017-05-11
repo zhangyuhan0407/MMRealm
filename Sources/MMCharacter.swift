@@ -1,54 +1,96 @@
 //
 //  MMCharacter.swift
-//  MMRealm
+//  MMClient
 //
-//  Created by yuhan zhang on 1/14/17.
-//
+//  Created by yuhan zhang on 4/9/17.
+//  Copyright © 2017 octopus. All rights reserved.
 //
 
 import Foundation
-
-import OCTJSON
-import OCTFoundation
+import SwiftyJSON
 
 
-class MMCharacter {
+final class MMCharacter: JSONDeserializable {
     
-    var card: String
-    var position: Int
-    var fabao: String
+    var name: String {
+        return card.name
+    }
+    
+    var story: String {
+        return card.story
+    }
+    
+    var imageName: String {
+        return card.imageName
+    }
+    
+    var skill1Description: String {
+        return card.skill1Description
+    }
+    
+    var skill2Description: String {
+        return card.skill2Description
+    }
+    
+    var key: String
+    var card: MMCard
     
     
-    init(card: String, position: Int, fabao: String) {
+    var weapon: MMWeapon?
+    
+    var armor: MMArmor?
+    
+    var trinket: MMTrinket?
+    
+    var position: Int = 0
+    
+    
+    private init(card: MMCard) {
         self.card = card
-        self.position = position
-        self.fabao = fabao
+        self.key = card.key
     }
     
     
-    var json: JSON {
-        return JSON(["card": card, "position": position, "fabao": fabao])
-    }
-    
-    
-}
+    static func deserialize(fromJSON json: JSON) -> MMCharacter {
 
-
-extension MMCharacter {
-    
-    static func deserialize(fromJSON json: JSON) -> MMCharacter? {
-        guard let card = json["card"].string,
-                let position = json["position"].int,
-                let fabao = json["fabao"].string
-        else {
-            return nil
+        
+        let card = MMCard(json[kCardKey].stringValue)
+        let ret = MMCharacter(card: card)
+        
+        
+        ret.position = json["position"].intValue
+        
+        
+        if let _ = json["weapon"]["key"].string {
+            ret.weapon = MMWeapon.deserialize(fromJSON: json["weapon"])
         }
         
-        return MMCharacter(card: card, position: position, fabao: fabao)
+        
+        if let _ = json["armor"]["key"].string {
+            ret.armor = MMArmor.deserialize(fromJSON: json["armor"])
+        }
+        
+        
+        if let _ = json["trinket"]["key"].string {
+            ret.trinket = MMTrinket.deserialize(fromJSON: json["trinket"])
+        }
+        
+        
+        return ret
+    }
+    
+    
+    var dict: [String: Any] {
+        return [kCardKey: card.key,
+                kTrinket: trinket?.dict ?? [:],
+                kWeapon: weapon?.dict ?? [:],
+                kArmor: armor?.dict ?? [:],
+                kPosition: position]
     }
     
     
 }
+
 
 
 

@@ -11,23 +11,23 @@ import OCTJSON
 import OCTFoundation
 
 
-public protocol OCTModel {
-    
-    init(fromDictionary dict: [String: Any])
-    
-    func toDictionary() -> [String: Any]
-    
-    var json: JSON { get }
-    
-}
-
-
-extension OCTModel {
-    
-    public var json: JSON {
-        return JSON(self.toDictionary())
-    }
-    
-}
+//public protocol OCTModel {
+//    
+//    init(fromDictionary dict: [String: Any])
+//    
+//    func toDictionary() -> [String: Any]
+//    
+//    var json: JSON { get }
+//    
+//}
+//
+//
+//extension OCTModel {
+//    
+//    public var json: JSON {
+//        return JSON(self.toDictionary())
+//    }
+//    
+//}
 
 

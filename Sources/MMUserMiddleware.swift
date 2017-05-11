@@ -12,7 +12,6 @@ import OCTJSON
 import OCTFoundation
 
 
-
 class MMUserMiddleware: RouterMiddleware {
     
     func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
@@ -41,8 +40,9 @@ class MMUserMiddleware: RouterMiddleware {
         
         
         //already login
-        if let _ = MMUserManager.sharedInstance.find(key: key) {
-            try response.send(OCTResponse.UserExists).end()
+        if let user = MMUserManager.sharedInstance.find(key: key) {
+//            try response.send(OCTResponse.UserExists).end()
+            try response.send(OCTResponse.Succeed(data: user.json)).end()
             return
         }
         
@@ -78,7 +78,8 @@ class MMUserMiddleware: RouterMiddleware {
         }
         
         
-        let newUser = MMUser(fromDictionary: [kKey: key])
+        let newUser = MMUser.create(key: key)
+        
         
 //        
 //        newUser.bag = JSON([:])
@@ -115,21 +116,7 @@ class MMUserMiddleware: RouterMiddleware {
 
 
 
-extension RouterResponse {
-    
-    func send(_ model: OCTModel) -> RouterResponse {
-        return self.send(JSON(model.toDictionary()).description)
-    }
-    
-    func send(_ s: CustomStringConvertible) -> RouterResponse {
-        return self.send(s.description)
-    }
-    
-    func send(_ model: OCTResponse) -> RouterResponse {
-        return self.send(model.description)
-    }
-    
-}
+
 
 
 

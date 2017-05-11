@@ -62,33 +62,28 @@ class MMCharMiddleware: RouterMiddleware {
         }
         
         
-        guard let jsonArray = request.jsonBody?.array else {
+        
+        guard let json = request.jsonBody else {
             try response.send(OCTResponse.InputFormatError).end()
             return
         }
         
         
-        Logger.debug("URL: \(request.matchedPath), Body: \(jsonArray)")
+        Logger.debug("URL: \(request.matchedPath), Body: \(json)")
         
         
+        let jsonArray = json[kCharacter].array!
         var chars = [MMCharacter]()
         for json in jsonArray {
-            guard let char = MMCharacter.deserialize(fromJSON: json) else {
-                try response.send(OCTResponse.InputFormatError).end()
-                return
-            }
+            let char = MMCharacter.deserialize(fromJSON: json)
             
             chars.append(char)
         }
         
         
         
-        do {
-            try user.saveCharacters(chars: chars)
-        } catch {
-            try response.send(OCTResponse.ServerError).end()
-            return
-        }
+        user.putCharacters(chars: chars)
+        
         
         try response.send(OCTResponse.EmptyResult).end()
         
@@ -98,38 +93,38 @@ class MMCharMiddleware: RouterMiddleware {
 
 
 
-class MMCharacterMiddleware: RouterMiddleware {
-    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
-        
-        guard let key = request.parameters["user"],
-                let card = request.parameters["card"],
-                let cost = request.jsonBody?.intDictionary
-        else {
-            try response.send(OCTResponse.InputFormatError).end()
-            return
-        }
-        
-        
-        Logger.debug("URL: \(request.matchedPath), Body: \(cost)")
-        
-        
-        guard let user = MMUserManager.sharedInstance.find(key: key) else {
-            try response.send(OCTResponse.ShouldLogin).end()
-            return
-        }
-        
-        
-        do {
-            let card = try user.makeCard(card: card, cost: cost)
-            try response.send(OCTResponse.Succeed(data: card.json)).end()
-        } catch {
-            try response.send(OCTResponse.ServerError).end()
-            return
-        }
-        
-        
-    }
-}
+//class MMCharacterMiddleware: RouterMiddleware {
+//    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+//        
+//        guard let key = request.parameters["user"],
+//                let card = request.parameters["card"],
+//                let cost = request.jsonBody?.intDictionary
+//        else {
+//            try response.send(OCTResponse.InputFormatError).end()
+//            return
+//        }
+//        
+//        
+//        Logger.debug("URL: \(request.matchedPath), Body: \(cost)")
+//        
+//        
+//        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+//            try response.send(OCTResponse.ShouldLogin).end()
+//            return
+//        }
+//        
+//        
+//        do {
+//            let card = try user.makeCard(card: card, cost: cost)
+//            try response.send(OCTResponse.Succeed(data: card.json)).end()
+//        } catch {
+//            try response.send(OCTResponse.ServerError).end()
+//            return
+//        }
+//        
+//        
+//    }
+//}
 
 
 

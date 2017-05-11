@@ -11,43 +11,40 @@ import OCTJSON
 import OCTFoundation
 
 
-class MMUserDAO: OCTDAO {
+class MMUserDAO {
     
     static var sharedInstance = MMUserDAO()
     
     private init() {}
     
-    typealias Model = MMUser
     
-    static var TableName: String = "mmuser"
     
-    static var PrimaryKey: String = "key"
-    
+    func load(user key: String) -> MMUser {
+        let json = JSON.read(fromFile: "\(UserRepoPath)/\(key)")!
+
+        
+        let user = MMUser.deserialize(fromJSON: json)
+        
+        
+        loadBag(forUser: user)
+        loadChars(forUser: user)
+        
+        return user
+    }
     
     
     func findOne(id: String) -> MMUser? {
         guard let json = JSON.read(fromFile: "\(UserRepoPath)/\(id)") else {
             return nil
         }
+      
         
-        
-        let dict: [String : Any] = [kKey:       id,
-                                    kVIPLevel:  json[kVIPLevel].int ?? 0,
-                                    kLevel:     json[kLevel].int ?? 0,
-                                    kPVELevel:  json[kPVELevel].int ?? 0,
-                                    kPVPLevel:  json[kPVPLevel].int ?? 0,
-                                    kGold:      json[kGold].int ?? 0,
-                                    kYuanBao:   json[kYuanBao].int ?? 0]
-        
-        
-        let user = MMUser(fromDictionary: dict)
+        let user = MMUser.deserialize(fromJSON: json)
         
         
         loadBag(forUser: user)
         loadChars(forUser: user)
-        loadFabao(forUser: user)
-        
-        
+
         
         return user
     }
@@ -56,13 +53,12 @@ class MMUserDAO: OCTDAO {
     
     func save(_ obj: MMUser) throws {
         
-        let json = obj.json
+        let json = obj.infoJSON
         
         try json.description.write(toFile: "\(UserRepoPath)/\(obj.key)", atomically: true, inAppendMode: false)
         
-        try saveBag(forUser: obj)
-        try saveChars(forUser: obj)
-        try saveFabao(forUser: obj)
+        saveBag(forUser: obj)
+        saveChars(forUser: obj)
         
     }
     
@@ -72,39 +68,40 @@ class MMUserDAO: OCTDAO {
     
     
     
-    func saveBag(forUser user: MMUser) throws {
+    func saveBag(forUser user: MMUser) {
         
-        let jsons = user.bagJSON
-        
-        try jsons.description.write(toFile: "\(UserBagRepoPath)/\(user.key)", atomically: true, inAppendMode: false)
+        do {
+            try user.bagJSON.description.write(toFile: "\(UserBagRepoPath)/\(user.key)", atomically: true, inAppendMode: false)
+        } catch let e {
+            fatalError("\(e)")
+        }
     }
     
     
     
-    func saveChars(forUser user: MMUser) throws {
+    func saveChars(forUser user: MMUser) {
         
-        var jsons = [JSON]()
-        
-        for c in user.chars {
-            jsons.append(c.json)
+        do {
+            try user.charsJSON.description.write(toFile: "\(UserCharRepoPath)/\(user.key)", atomically: false, inAppendMode: false)
+        } catch {
+            fatalError()
         }
         
-        try JSON(jsons).description.write(toFile: "\(UserCharRepoPath)/\(user.key)", atomically: false, inAppendMode: false)
     }
     
     
     
-    func saveFabao(forUser user: MMUser) throws {
-        
-        var jsons = [JSON]()
-        
-        for c in user.fabao {
-            jsons.append(c.json)
-        }
-        
-        try JSON(jsons).description.write(toFile: "\(UserFabaoRepoPath)/\(user.key)", atomically: false, inAppendMode: false)
-        
-    }
+//    func saveFabao(forUser user: MMUser) throws {
+//        
+//        var jsons = [JSON]()
+//        
+//        for c in user.fabao {
+//            jsons.append(c.json)
+//        }
+//        
+//        try JSON(jsons).description.write(toFile: "\(UserFabaoRepoPath)/\(user.key)", atomically: false, inAppendMode: false)
+//        
+//    }
     
     
     
@@ -112,46 +109,88 @@ class MMUserDAO: OCTDAO {
     
     
     
-    func loadFabao(forUser user: MMUser) -> Bool {
-        let s = String.read(fromFile: "\(UserFabaoRepoPath)/\(user.key)") ?? "[]"
+//    func loadFabao(forUser user: MMUser) -> Bool {
+//        let s = String.read(fromFile: "\(UserFabaoRepoPath)/\(user.key)") ?? "[]"
+//        
+//        do {
+//            var temp = [MMFabao]()
+//            
+//            let json = try JSON.deserialize(s)
+//            
+//            let array = json.array!
+//            
+//            for fb in array {
+//                
+//                if let fabao = MMFabao.deserialize(fromJSON: fb) {
+//                    temp.append(fabao)
+//                }
+//            }
+//            
+//            user.fabao = temp
+//            
+//        } catch {
+//            return false
+//        }
+//        
+//        return true
+//    }
+    
+    
+    @discardableResult
+    func loadBag(forUser user: MMUser) -> Bool {
         
-        do {
-            var temp = [MMFabao]()
+        
+        func load(type: String, inJSON json: JSON, forUser user: MMUser) {
+            let jsonArray = json[type].array ?? []
+    
             
-            let json = try JSON.deserialize(s)
-            
-            let array = json.array!
-            
-            for fb in array {
-                
-                if let fabao = MMFabao.deserialize(fromJSON: fb) {
-                    temp.append(fabao)
+    
+            switch type {
+            case "weapon":
+                var temp = [MMWeapon]()
+                for json in jsonArray {
+                    temp.append(MMWeapon.deserialize(fromJSON: json))
                 }
+                user.weapons = temp
+            case "armor":
+                var temp = [MMArmor]()
+                for json in jsonArray {
+                    temp.append(MMArmor.deserialize(fromJSON: json))
+                }
+                user.armors = temp
+            case "trinket":
+                var temp = [MMTrinket]()
+                for json in jsonArray {
+                    temp.append(MMTrinket.deserialize(fromJSON: json))
+                }
+                user.trinkets = temp
+            case "misc":
+                var temp = [MMMisc]()
+                for json in jsonArray {
+                    temp.append(MMMisc.deserialize(fromJSON: json))
+                }
+                user.miscs = temp
+            default:
+                fatalError()
             }
-            
-            user.fabao = temp
-            
-        } catch {
-            return false
         }
         
-        return true
-    }
-    
-    
-    
-    func loadBag(forUser user: MMUser) -> Bool {
+        
+        
         let s = String.read(fromFile: "\(UserBagRepoPath)/\(user.key)") ?? "{}"
         
         do {
             let json = try JSON.deserialize(s)
             
-            let dict = json.intDictionary ?? [:]
             
-            user.bag = dict
+            load(type: "weapon", inJSON: json, forUser: user)
+            load(type: "armor", inJSON: json, forUser: user)
+            load(type: "trinket", inJSON: json, forUser: user)
+            load(type: "misc", inJSON: json, forUser: user)
             
         } catch {
             Logger.error("JSON Format Error: --- \(s)")
+            fatalError()
             return false
         }
         
@@ -160,34 +199,23 @@ class MMUserDAO: OCTDAO {
     }
     
     
-    
+    @discardableResult
     func loadChars(forUser user: MMUser) -> Bool {
         
-        let s = String.read(fromFile: "\(UserCharRepoPath)/\(user.key)") ?? "[]"
+        let json = JSON.read(fromFile: "\(UserCharRepoPath)/\(user.key)")!
         
-        do {
-            var temp = [MMCharacter]()
+        var temp = [MMCharacter]()
+        let array = json.array!
+        
+        for char in array {
             
-            let json = try JSON.deserialize(s)
+            let c = MMCharacter.deserialize(fromJSON: char)
             
-            let array = json.array!
-            
-            for char in array {
-                
-                let card = char["card"].string
-                let position = char["position"].int
-                let fabao = char["fabao"].string
-                
-                let c = MMCharacter(card: card!, position: position!, fabao: fabao!)
-                
-                temp.append(c)
-            }
-            
-            user.chars = temp
-            
-        } catch {
-            return false
+            temp.append(c)
         }
+        
+        user.characters = temp
+        
         
         return true
     }

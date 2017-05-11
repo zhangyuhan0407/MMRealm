@@ -1,69 +1,58 @@
 //
 //  MMUser.swift
-//  MMRealm
+//  MMClient
 //
-//  Created by yuhan zhang on 11/29/16.
-//
+//  Created by yuhan zhang on 4/4/17.
+//  Copyright © 2017 octopus. All rights reserved.
 //
 
 import Foundation
-import OCTJSON
-import OCTFoundation
 
 
-#if os(Linux)
-    let BasePath =              "/root/Developer/MMRealm"
-    let UserCharRepoPath =      "/root/Developer/MMRealm/UserCharRepo"
-    let UserRepoPath =          "/root/Developer/MMRealm/UserRepo"
-    let UserFabaoRepoPath =     "/root/Developer/MMRealm/UserFabaoRepo"
-    let UserBagRepoPath =       "/root/Developer/MMRealm/UserBagRepo"
-#else
-    let BasePath =              "/Users/yorg/Developer/MMRealm"
-    let UserCharRepoPath =      "/Users/yorg/Developer/MMRealm/UserCharRepo"
-    let UserRepoPath =          "/Users/yorg/Developer/MMRealm/UserRepo"
-    let UserFabaoRepoPath =     "/Users/yorg/Developer/MMRealm/UserFabaoRepo"
-    let UserBagRepoPath =       "/Users/yorg/Developer/MMRealm/UserBagRepo"
-#endif
 
-
-class MMUser: OCTModel {
+final class MMUser: JSONDeserializable {
     
+    static var sharedInstance = MMUser()
     
-    var key: String
+    var messageQueue: [String: Any]!
+    
+    var key: String = "zyh"
+    var gold = 0
+    var yuanbao = 0
+    
     
     var vipLevel: Int = 0
     var level: Int = 0
     var pveLevel: Int = 0
     var pvpLevel: Int = 0
-    
-    var yuanbao: Int = 0
-    var gold: Int = 0
-    
-    
-    var lastLogin: Date
+    var lastLogin: Date = Date()
     var token: String = ""
+
+    
+    var weapons: [MMWeapon] = []
+    
+    var armors: [MMArmor] = []
+    
+    var trinkets: [MMTrinket] = []
+    
+    var miscs: [MMMisc] = []
     
     
-    var bag: [String: Int] = [:]
-    var fabao: [MMFabao] = []
-    var chars: [MMCharacter] = []
+    
+    var characters = [MMCharacter]()
     
     
-    required init(fromDictionary dict: [String : Any]) {
-        self.key = dict[kKey] as! String
-        self.lastLogin = Date()
-        self.vipLevel = dict[kVIPLevel] as? Int ?? 0
-        self.level = dict[kLevel] as? Int ?? 0
-        self.pveLevel = dict[kPVELevel] as? Int ?? 0
-        self.pvpLevel = dict[kPVPLevel] as? Int ?? 0
-        self.yuanbao = dict[kYuanBao] as? Int ?? 0
-        self.gold = dict[kGold] as? Int ?? 0
+    
+    private init() {
+
     }
     
     
     
+    var synchronizeQueue: [String: Any] = [:]
     
-    func toDictionary() -> [String : Any] {
+    
+    var dict: [String : Any] {
         return [kKey: self.key,
                 kLastLogin: self.lastLogin.description,
                 kVIPLevel: self.vipLevel,
@@ -75,41 +64,21 @@ class MMUser: OCTModel {
     }
     
     
-    var charsJSON: JSON {
-        var jsons = [JSON]()
-        for c in chars {
-            jsons.append(c.json)
-        }
-        return JSON(jsons)
-    }
-    
-    
-    var fabaoJSON: JSON {
-        var jsons = [JSON]()
-        for fb in fabao {
-            jsons.append(fb.json)
-        }
-        return JSON(jsons)
-    }
-    
-    
-    var bagJSON: JSON {
-        return JSON(self.bag)
-    }
-    
-    
-    
-    var json: JSON {
-        var json = JSON(self.toDictionary())
-
-        json["bag"] = self.bagJSON
-        json["chars"] = self.charsJSON
-        json["fabao"] = self.fabaoJSON
-        
-        return json
+    static func deserialize(fromJSON json: JSON) -> MMUser {
+        let user = MMUser()
+        user.key = json[kKey].stringValue
+        user.lastLogin = Date()
+        user.vipLevel = json[kVIPLevel].intValue
+        user.level = json[kLevel].intValue
+        user.pveLevel = json[kPVELevel].intValue
+        user.pvpLevel = json[kPVPLevel].intValue
+        user.yuanbao = json[kYuanBao].intValue
+        user.gold = json[kGold].intValue
+        return user
     }
     
 }
+
 
 
 
