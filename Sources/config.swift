@@ -59,3 +59,13 @@ extension RouterResponse {
     
 }
 
+
+
+
+func fatalerror(_ s: String = "") {
+    fatalError(s)
+}
+
+
+
+

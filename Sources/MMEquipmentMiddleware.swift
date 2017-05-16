@@ -15,9 +15,11 @@ import OCTFoundation
 class MMEquipmentMiddleware: RouterMiddleware {
     
     func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
-        let type = request.parameters["type"]!
         
-        guard let key = request.parameters["key"] else {
+        
+        guard let key = request.parameters["key"],
+                let type = request.parameters["type"]
+        else {
             try response.send(OCTResponse.InputFormatError).end()
             return
         }
@@ -42,7 +44,7 @@ class MMEquipmentMiddleware: RouterMiddleware {
         } else if type == "unequip" {
             unequip(user: user, char: char, category: category, json: json)
         } else {
-            fatalError()
+            fatalerror()
         }
         
         
@@ -79,7 +81,7 @@ class MMEquipmentMiddleware: RouterMiddleware {
                 _ = user.add(trinket: existing!)
             }
         default:
-            fatalError()
+            fatalerror()
         }
     }
     
@@ -105,7 +107,7 @@ class MMEquipmentMiddleware: RouterMiddleware {
                 _ = user.add(trinket: existing!)
             }
         default:
-            fatalError()
+            fatalerror()
         }
     }
     

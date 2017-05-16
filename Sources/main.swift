@@ -45,7 +45,26 @@ router.put("/user/:key/chars", middleware: MMCharMiddleware())
 //MARK:- Reward
 
 
-//router.post("", middleware: MMBagMiddleware())
+
+
+router.get("/user/:key/bag") { (request, response, next) in
+    
+    guard let key = request.parameters["key"] else {
+        try response.send(OCTResponse.InputFormatError).end()
+        return
+    }
+    
+    
+    guard let user = MMUserManager.sharedInstance.find(key: key) else {
+        try response.send(OCTResponse.ShouldLogin).end()
+        return
+    }
+    
+    
+    try response.send(OCTResponse.Succeed(data: user.bagJSON)).end()
+    
+}
+
 
 router.post("/user/:key/bag/update", middleware: MMUpdateBagMiddleware())
 
@@ -152,25 +171,6 @@ router.get("/user/:key/message") { (request, response, next) in
 //router.post("/user/:key/baoshi/:type", middleware: MMBaoshiMiddleware())
 
 
-
-
-router.get("/user/:key/bag") { (request, response, next) in
-    
-    guard let key = request.parameters["key"] else {
-        try response.send(OCTResponse.InputFormatError).end()
-        return
-    }
-    
-    
-    guard let user = MMUserManager.sharedInstance.find(key: key) else {
-        try response.send(OCTResponse.ShouldLogin).end()
-        return
-    }
-    
-    
-    try response.send(OCTResponse.Succeed(data: user.bagJSON)).end()
-    
-}
 
 
 
