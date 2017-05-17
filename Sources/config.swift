@@ -8,18 +8,16 @@
 
 import Foundation
 import OCTJSON
-import OCTFoundation
 import Kitura
-
-
+import OCTFoundation
 
 
 #if os(Linux)
-let BasePath =              "/root/Developer/MMRealm"
-let UserCharRepoPath =      "/root/Developer/MMRealm/UserCharRepo"
-let UserRepoPath =          "/root/Developer/MMRealm/UserRepo"
-let UserFabaoRepoPath =     "/root/Developer/MMRealm/UserFabaoRepo"
-let UserBagRepoPath =       "/root/Developer/MMRealm/UserBagRepo"
+let BasePath =              "~/Developer/MMRealm"
+let UserCharRepoPath =      "~/Developer/MMRealm/UserCharRepo"
+let UserRepoPath =          "~/Developer/MMRealm/UserRepo"
+let UserFabaoRepoPath =     "~/Developer/MMRealm/UserFabaoRepo"
+let UserBagRepoPath =       "~/Developer/MMRealm/UserBagRepo"
 #else
 let BasePath =              "/Users/yorg/Developer/MMRealm"
 let UserCharRepoPath =      "/Users/yorg/Developer/MMRealm/UserCharRepo"
@@ -30,7 +28,6 @@ let UserBagRepoPath =       "/Users/yorg/Developer/MMRealm/UserBagRepo"
 
 
 typealias JSON = Json
-
 
 extension JSON {
     var stringValue: String {
@@ -45,19 +42,32 @@ extension JSON {
 
 extension RouterResponse {
     
-    //    func send(_ model: OCTModel) -> RouterResponse {
-    //        return self.send(JSON(model.toDictionary()).description)
-    //    }
-    
-    //    func send(_ s: CustomStringConvertible) -> RouterResponse {
-    //        return self.send(s.description)
-    //    }
-    
     func send(_ model: OCTResponse) -> RouterResponse {
         return self.send(model.description)
     }
     
 }
+
+
+
+extension RouterRequest {
+
+    var jsonBody: JSON? {
+        do {
+
+            guard let s = try self.readString() else {
+                return nil
+            }
+
+            return try JSON.deserialize(s)
+
+        } catch {
+            return nil
+        }
+    }
+
+}
+
 
 
 
