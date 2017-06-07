@@ -6,9 +6,9 @@
 //
 //
 
-import PostgreSQL
-import OCTFoundation
-import OCTJSON
+//import PostgreSQL
+//import OCTFoundation
+//import OCTJSON
 
 //
 //protocol OCTDAO {

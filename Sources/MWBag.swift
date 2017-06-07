@@ -107,7 +107,7 @@ class MMUpdateBagMiddleware: RouterMiddleware {
             
             
             let gold = json[kGold].int ?? 0
-            let yuanbao = json[kYuanBao].int ?? 0
+            let silver = json[kSilver].int ?? 0
             
             
             var weapons = [MMWeapon]()
@@ -134,7 +134,7 @@ class MMUpdateBagMiddleware: RouterMiddleware {
             
             var ret = [String: Any]()
             ret.updateValue(gold, forKey: "gold")
-            ret.updateValue(yuanbao, forKey: "yuanbao")
+            ret.updateValue(silver, forKey: kSilver)
             ret.updateValue(weapons, forKey: "weapons")
             ret.updateValue(armors, forKey: "armors")
             ret.updateValue(trinkets, forKey: "trinkets")

@@ -45,7 +45,7 @@ final class MMCharacter: JSONDeserializable {
     var position: Int = 0
     
     
-    private init(card: MMCard) {
+    init(card: MMCard) {
         self.card = card
         self.key = card.key
     }

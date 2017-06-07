@@ -10,6 +10,49 @@ import Foundation
 import OCTFoundation
 
 
+extension MMUser {
+    
+    
+    public func putCharacters(chars: [MMCharacter]) -> Bool {
+        self.characters = chars
+        return true
+    }
+    
+    
+    
+    public func findChar(key: String) -> MMCharacter? {
+        
+        for c in self.characters {
+            if c.card.key == key {
+                return c
+            }
+        }
+        
+        return nil
+        
+    }
+
+
+
+    func add(card: MMCharacter) -> Bool {
+
+        //zyh!!
+        self.characters.append(card)
+        
+        
+        
+        return true
+        
+    }
+    
+    
+    
+}
+
+
+
+
+
 //class MMInventoryRepo {
 //    
 //    static var sharedInstance = MMInventoryRepo()

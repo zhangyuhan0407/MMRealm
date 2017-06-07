@@ -40,6 +40,8 @@ router.get("/user/:key/chars", middleware: MMCharMiddleware())
 router.put("/user/:key/chars", middleware: MMCharMiddleware())
 
 
+router.post("/user/:key/chars", middleware: MMCharMiddleware())
+
 
 
 //MARK:- Reward
@@ -66,35 +68,46 @@ router.get("/user/:key/bag") { (request, response, next) in
 }
 
 
-router.post("/user/:key/bag/update", middleware: MMUpdateBagMiddleware())
+
+
+//router.post("/user/:key/bag/update", middleware: MMUpdateBagMiddleware())
 
 router.post("/user/:key/bag/:type", middleware: MMBagMiddleware())
 
 
 
 
+router.post("/user/:key/trade", middleware: MMTradeMiddleware())
+
+
 
 //router.post("/user/:key/reward", middleware: MMRewardMiddleware())
 
 
-router.post("/user/:key/battle/:battleid/slots", middleware: MMSlotsMiddleware())
+//router.post("/user/:key/battle/:battleid/slots", middleware: MMSlotsMiddleware())
 
 
-router.get("/user/:key/message") { (request, response, next) in
-    
-    guard let key = request.parameters["key"] else {
-        try response.send(OCTResponse.InputFormatError).end()
-        return
-    }
-    
-    
-    let message = MMUserManager.sharedInstance.findMessage(forUser: key)
-    
-    
-    try response.send(JSON(message)).end()
-    
-    
-}
+router.post("/user/:key/dungeon/:battleid", middleware: MMDungeonMiddleware())
+
+
+router.post("/user/:key/mission/:missionid", middleware: MMMissionMiddleware())
+
+
+//router.get("/user/:key/message") { (request, response, next) in
+//    
+//    guard let key = request.parameters["key"] else {
+//        try response.send(OCTResponse.InputFormatError).end()
+//        return
+//    }
+//    
+//    
+//    let message = MMUserManager.sharedInstance.findMessage(forUser: key)
+//    
+//    
+//    try response.send(JSON(message)).end()
+//    
+//    
+//}
 
 
 
@@ -157,18 +170,13 @@ router.get("/user/:key/message") { (request, response, next) in
 
 
 
-//router.get("/user/:key/store", middleware: MMStoreMiddleware())
+router.get("/user/:key/shop", middleware: MMShopMiddleware())
 
 
-//router.post("/user/:key/store", middleware: MMStoreMiddleware())
+router.post("/user/:key/shop", middleware: MMShopMiddleware())
 
 
-
-// Baoshi
-
-
-
-//router.post("/user/:key/baoshi/:type", middleware: MMBaoshiMiddleware())
+router.put("/user/:key/shop", middleware: MMShopMiddleware())
 
 
 

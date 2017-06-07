@@ -14,14 +14,6 @@ import OCTFoundation
 extension MMUser {
     
     
-    static func create(key: String) -> MMUser {
-        let json = JSON(["key": key])
-        
-        return MMUser.deserialize(fromJSON: json)
-    }
-    
-    
-    
     var infoJSON: JSON {
         return JSON(self.dict)
     }
@@ -70,10 +62,19 @@ extension MMUser {
         json["misc"] = JSON(tempJSON)
         
         json["gold"] = JSON(self.gold)
-        json["yuanbao"] = JSON(self.yuanbao)
+        json[kSilver] = JSON(self.silver)
         
         return json
         
+    }
+    
+    
+    var shopItemJSON: JSON {
+        var ret = [JSON]()
+        for item in self.shopItems {
+            ret.append(item.json)
+        }
+        return JSON(ret)
     }
     
     

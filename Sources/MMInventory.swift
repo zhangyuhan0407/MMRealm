@@ -46,45 +46,67 @@ class MMInventoryRepo {
     
     static func create(withKey key: String) -> MMInventory {
         
-        let array = key.components(separatedBy: "_")
-        let category = MMCategory.deserialize(fromString: array[1])
-        let level = Int(array[2])!
+        let json = JSON.read(fromFile: "\(INVPath)/\(key)")!
+        
+        return MMInventoryRepo.deserialize(fromJSON: json)
         
         
-        
-        let randomNumber = Int.random()
-        var rarity: MMRarity = .white
-        if randomNumber < 10 {
-            rarity = .purple
-        } else if randomNumber < 30 {
-            rarity = .blue
-        } else if randomNumber < 60 {
-            rarity = .green
-        }
-        
-        
-        switch category {
-        case .weapon:
-            var weapon = MMWeapon()
-            weapon.key = NSUUID().description
-            weapon.imageName = "\(array[0])_\(array[1])_\(category)_\(level)"
-            weapon.rarity = rarity
-            weapon.type = MMWeaponType.random()
-            return weapon
-        case .armor:
-            var armor = MMArmor()
-            armor.key = NSUUID().description
-            armor.imageName = "\(array[0])_\(array[1])_\(category)_\(level)"
-            armor.rarity = rarity
-            armor.type = MMArmorType.random()
-            return armor
-        default:
-            fatalError()
-        }
+//        let array = key.components(separatedBy: "_")
+//        let category = MMCategory.deserialize(fromString: array[1])
+//        let level = Int(array[2])!
+//        
+//        
+//        
+//        let randomNumber = Int.random()
+//        var rarity: MMRarity = .white
+//        if randomNumber < 10 {
+//            rarity = .purple
+//        } else if randomNumber < 30 {
+//            rarity = .blue
+//        } else if randomNumber < 60 {
+//            rarity = .green
+//        }
+//        
+//        
+//        switch category {
+//        case .weapon:
+//            var weapon = MMWeapon()
+//            weapon.key = NSUUID().description
+//            weapon.imageName = "\(array[0])_\(array[1])_\(category)_\(level)"
+//            weapon.rarity = rarity
+//            weapon.type = MMWeaponType.random()
+//            return weapon
+//        case .armor:
+//            var armor = MMArmor()
+//            armor.key = NSUUID().description
+//            armor.imageName = "\(array[0])_\(array[1])_\(category)_\(level)"
+//            armor.rarity = rarity
+//            armor.type = MMArmorType.random()
+//            return armor
+//        default:
+//            fatalError()
+//        }
         
         
         
     }
+    
+    
+    static func deserialize(fromJSON json: JSON) -> MMInventory {
+        let type = MMCategory.deserialize(fromString: json["category"].string!)
+        
+        switch type {
+        case .weapon:
+            return MMWeapon.deserialize(fromJSON: json)
+        case .armor:
+            return MMArmor.deserialize(fromJSON: json)
+        case .trinket:
+            return MMTrinket.deserialize(fromJSON: json)
+        case .misc:
+            return MMMisc.deserialize(fromJSON: json)
+        }
+    }
+    
     
 //    func create(key: String, category: String, rarity: String?) -> MMWeapon {
 //

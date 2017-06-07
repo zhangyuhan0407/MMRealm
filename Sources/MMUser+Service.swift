@@ -19,8 +19,8 @@ extension MMUser {
                 if self.gold < v as! Int {
                     return false
                 }
-            } else if k == "yuanbao" {
-                if self.yuanbao < v as! Int {
+            } else if k == kSilver {
+                if self.silver < v as! Int {
                     return false
                 }
             } else if k == "weapons" {
@@ -43,9 +43,14 @@ extension MMUser {
                 }
             } else if k == "miscs" {
                 for w in v as! [MMMisc] {
-                    if !has(misc: w) {
-                        return false
+                    if let misc = find(misc: w) {
+                        if misc.count < w.count {
+                            return false
+                        }
                     }
+                    
+                    return false
+                    
                 }
             }
         }
@@ -53,195 +58,84 @@ extension MMUser {
         return true
     }
     
+
     
     
     
-    
-//    public func findBag(key: String) -> Int {
-//        
-////        return self.bag[key] ?? 0
-//        
-//        return 0
-//        
-//    }
+    func upgrade(dungeon level: Int) -> Bool {
+        self.dungeonLevel = level
+        return true
+    }
     
     
     
-//    public func findFabao(key: String) -> MMFabao? {
-//        
-//        for fb in self.fabao {
-//            if fb.key == key {
-//                return fb
-//            }
-//        }
-//        
-//        return nil
-//        
-//    }
+    func has(mission: Int) -> Bool {
+        return self.missionLevels.contains(mission)
+    }
     
     
-    
-    public func findChar(key: String) -> MMCharacter? {
-        
-        for c in self.characters {
-            if c.card.key == key {
-                return c
+    func refreshMission() -> Bool {
+        var ret = [Int]()
+        while ret.count < 6 {
+            let r = Int.random(max: 10) + 1
+            
+            var isFound = false
+            for i in ret {
+                if i == r {
+                    isFound = true
+                    continue
+                }
+                
+            }
+            
+            if !isFound {
+                ret.append(r)
             }
         }
         
-        return nil
-        
+        self.missionLevels = ret
+        return true
     }
     
     
     
-//    
-//    private func add(fabao: MMFabao) throws {
-//        
-//        //zyh!!  判断是否已经有这个法宝
-//        self.fabao.append(fabao)
-//        
-//    }
-//    
-    
-    
-    
-    private func add(card: MMCharacter) throws {
-        
-        //zyh!!
-        self.characters.append(card)
-    }
-    
-    
-    func has(weapon: MMWeapon) -> Bool {
-        for w in self.weapons {
-            if w.key == weapon.key {
-                return true
+    func remove(mission level: Int) -> Bool {
+        if has(mission: level) {
+            self.missionLevels = self.missionLevels.filter {
+                $0 != level
             }
-        }
-        
-        return false
-    }
-    
-    func has(armor: MMArmor) -> Bool {
-        for w in self.armors {
-            if w.key == armor.key {
-                return true
-            }
-        }
-        
-        return false
-    }
-    
-    func has(trinket: MMTrinket) -> Bool {
-        for w in self.trinkets {
-            if w.key == trinket.key {
-                return true
-            }
-        }
-        
-        return false
-    }
-    
-    func has(misc: MMMisc) -> Bool {
-        for w in self.miscs {
-            if w.key == misc.key {
-                return true
-            }
+            return true
         }
         
         return false
     }
     
     
-    
-    func add(inv: MMInventory) -> Bool {
-        switch inv.category {
-        case .weapon:
-            return add(weapon: inv as! MMWeapon)
-        case .armor:
-            return add(armor: inv as! MMArmor)
-        case .trinket:
-            return add(trinket: inv as! MMTrinket)
-        case .misc:
-            return add(misc: inv as! MMMisc)
-        }
-    }
-    
-    
-    func add(weapon: MMWeapon) -> Bool {
-        if self.weapons.count >= 49 {
+    private func upgrade(mission level: Int) -> Bool {
+        
+        if !remove(mission: level) {
             return false
         }
-        self.weapons.append(weapon)
-        return true
-    }
-    
-    
-    func add(armor: MMArmor) -> Bool {
-        if self.armors.count >= 49 {
-            return false
-        }
-        self.armors.append(armor)
-        return true
-    }
-    
-    
-    func add(trinket: MMTrinket) -> Bool {
-        if self.trinkets.count >= 49 {
-            return false
-        }
-        self.trinkets.append(trinket)
-        return true
-    }
-    
-    
-    func add(misc: MMMisc) -> Bool {
-        if self.miscs.count >= 49 {
-            return false
-        }
-        self.miscs.append(misc)
-        return true
-    }
-    
-    
-    func remove(inv: MMInventory) -> Bool {
-        switch inv.category {
-        case .weapon:
-            self.weapons = self.weapons.filter { $0.key != inv.key }
-        case .armor:
-            self.armors = self.armors.filter { $0.key != inv.key }
-        case .trinket:
-            self.trinkets = self.trinkets.filter { $0.key != inv.key }
-        case .misc:
-            self.miscs = self.miscs.filter { $0.key != inv.key }
+        
+        
+        var exists = false
+        
+        while !exists {
+            let r = Int.random()
+            exists = true
+            for i in self.missionLevels {
+                if i == r {
+                    exists = false
+                }
+            }
         }
         
         return true
     }
-    
-    func remove(weapon: MMWeapon) -> Bool {
-        self.weapons = self.weapons.filter { $0.key != weapon.key }
-        return true
-    }
-    
-    func remove(armor: MMArmor) -> Bool {
-        self.armors = self.armors.filter { $0.key != armor.key }
-        return true
-    }
-    
-    func remove(trinket: MMTrinket) -> Bool {
-        self.trinkets = self.trinkets.filter { $0.key != trinket.key }
-        return true
-    }
-    
-    func remove(misc: MMMisc) -> Bool {
-        self.miscs = self.miscs.filter { $0.key != misc.key }
-        return true
-    }
-    
+        
     
     //MARK:- Public
+    
     
     public func updateBag(gain: [String: Any], cost: [String: Any]) throws {
         if !checkMaterialsEnough(fromDictionary: cost) {
@@ -251,79 +145,79 @@ extension MMUser {
         cost.forEach { k, v in
             if k == "gold" {
                 self.gold -= v as! Int
-            } else if k == "yuanbao" {
-                self.yuanbao -= v as! Int
-            } else if k == "weapons" {
+            }
+                
+            else if k == kSilver {
+                self.silver -= v as! Int
+            }
+            
+            else if k == "weapons" {
                 for w in v as! [MMWeapon] {
                     self.remove(weapon: w)
                 }
-            } else if k == "armors" {
+            }
+            
+            else if k == "armors" {
                 for w in v as! [MMArmor] {
                     self.remove(armor: w)
                 }
-            } else if k == "trinkets" {
+            }
+            
+            else if k == "trinkets" {
                 for w in v as! [MMTrinket] {
                     self.remove(trinket: w)
                 }
-            } else if k == "miscs" {
+            }
+            
+            else if k == "miscs" {
                 for w in v as! [MMMisc] {
-                    self.remove(misc: w)
+                    self.remove(misc: w, count: w.count)
                 }
             }
         }
         
         
         gain.forEach { k, v in
+            
             if k == "gold" {
                 self.gold += v as! Int
-            } else if k == "yuanbao" {
-                self.yuanbao += v as! Int
-            } else if k == "weapons" {
+            }
+            
+            else if k == kSilver {
+                self.silver += v as! Int
+            }
+            
+            else if k == "weapons" {
                 for w in v as! [MMWeapon] {
                     self.add(weapon: w)
                 }
-            } else if k == "armors" {
+            }
+            
+            else if k == "armors" {
                 for w in v as! [MMArmor] {
                     self.add(armor: w)
                 }
-            } else if k == "trinkets" {
+            }
+            
+            else if k == "trinkets" {
                 for w in v as! [MMTrinket] {
                     self.add(trinket: w)
                 }
-            } else if k == "miscs" {
+            }
+            
+            else if k == "miscs" {
                 for w in v as! [MMMisc] {
-                    self.add(misc: w)
+                    self.add(misc: w, count: w.count)
                 }
             }
+            
+            
         }
         
-        
-        
     }
     
     
-//    public func updateBag(fromDictionary dict: [String: Int]) throws {
-//        if !checkMaterialsEnough(fromDictionary: dict) {
-//            throw OCTError.noMaterial
-//        }
-//        
-//        
-//        for (k, v) in dict {
-//            if k == kGold {
-//                self.gold += v
-//            } else if k == kYuanBao {
-//                self.yuanbao += v
-//            } else {
-//                self.addBag(value: v, forKey: k)
-//            }
-//        }
-//        
-//    }
-    
-    
-    public func putCharacters(chars: [MMCharacter]) {
-        self.characters = chars
-    }
+   
     
     
     
@@ -375,78 +269,6 @@ extension MMUser {
 //        
 //        try self.updateBag(fromDictionary: [baoshiKey: -howMany * 2, toBaoshi.description: howMany])
 //    }
-    
-
-    
-    
-//    @discardableResult
-//    func updateBag(name: String, count: Int) -> Bool {
-//        
-//        let own = self.bag[name] ?? 0
-//        
-//        if own + count < 0 {
-//            return false
-//        }
-//        
-//        self.addBag(value: count, forKey: name)
-//        
-//        return true
-//        
-//    }
-    
-//    
-//    @discardableResult
-//    func updateGold(count: Int) -> Bool {
-//        if self.gold + count < 0 {
-//            return false
-//        }
-//        
-//        self.gold += count
-//        
-//        return true
-//    }
-//    
-//    
-//    @discardableResult
-//    func updateYuanbao(count: Int) -> Bool {
-//        if self.yuanbao + count < 0 {
-//            return false
-//        }
-//        
-//        self.yuanbao += count
-//        
-//        return true
-//    }
-
-    
-    
-    
-    
-//    public func buyFabao(fabao: MMFabao, cost: [String: Int]) throws {
-//        
-//        try updateBag(fromDictionary: cost)
-//        
-//        
-//        //zyh!! 扣了道具 没得到法宝
-//        try add(fabao: fabao)
-//        
-//    }
-//
-//    
-//    
-//    public func buy(item: String, inPrice price: Int, howMany count: Int = 1) -> Bool {
-//        if self.gold < price * count {
-//            return false
-//        }
-//        
-//        self.gold -= price * count
-//        
-//        self.addBag(value: count, forKey: item)
-//        
-//        return true
-//    }
-    
-
     
     
     
@@ -507,6 +329,177 @@ extension MMUser {
 //        card.fabao = ""
 //        try self.add(fabao: fabao)
 //    }
+    
+    
+    
+    func gainSlots(keys: [String]) -> [JSON] {
+        
+        var ret: [JSON] = []
+        
+        for j in keys {
+            if j.hasPrefix("INV") {
+                
+                if Int.random() < 10 {
+                    
+                    let inv = MMInventoryRepo.create(withKey: j)
+                    
+                    ret.append(inv.json)
+                }
+                
+//                let sub = j.components(separatedBy: "_")
+//                
+//                let type = sub[1]
+//                let level = Int(sub[2])!
+//                
+//                if type == "Weapon" {
+//                    let weapon = MMWeapon.random(level: level)
+//                    self.add(weapon: weapon)
+//                    ret.append(weapon.json)
+//                    continue
+//                }
+//                    
+//                else if type == "Armor" {
+//                    let armor = MMArmor.random(level: level)
+//                    self.add(armor: armor)
+//                    ret.append(armor.json)
+//                    continue
+//                }
+//                    
+//                else if type == "Trinket" {
+//                    let trinket = MMTrinket.random(level: level)
+//                    self.add(trinket: trinket)
+//                    ret.append(trinket.json)
+//                    continue
+//                }
+//                    
+//                else if type == "Misc" {
+//                    let misc = MMMisc.create(fromKey: sub[0] + "_" + sub[1])
+//                    self.add(misc: misc, count: level)
+//                    ret.append(misc.json)
+//                    continue
+//                }
+//                    
+//                else {
+//                    fatalError()
+//                }
+                
+                
+            }
+                
+                
+                
+            else if j.hasPrefix("PROP") {
+                
+                let sub = j.components(separatedBy: "_")
+                let type = sub[1]
+                let count = Int(sub[2])!
+                
+                if type == "Gold" {
+                    self.add(gold: count)
+                    var gold = MMMisc.create(fromKey: sub[0] + "_" + sub[1])
+                    gold.increase(count: count)
+                    ret.append(gold.json)
+                    continue
+                }
+                else if type == "Silver" {
+                    self.add(silver: count)
+                    var silver = MMMisc.create(fromKey: sub[0] + "_" + sub[1])
+                    silver.increase(count: count)
+                    ret.append(silver.json)
+                    continue
+                }
+                else {
+                    fatalError()
+                }
+                
+            }
+                
+                
+                
+            else if j.hasPrefix("CARD") {
+                
+                
+                let misc: MMMisc
+                if j.contains("Random") {
+                    let cls = randomCls()
+                    misc = MMMisc.create(fromKey: "CARD_\(cls)")
+                }
+                else {
+                    misc = MMMisc.create(fromKey: j)
+                }
+                
+                
+                
+                self.add(misc: misc, count: 1)
+                ret.append(misc.json)
+                continue
+            }
+                
+                
+                
+            else {
+                fatalError()
+            }
+
+        }
+        
+        return ret
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    func refreshShopItems() -> Bool {
+        self.shopItems = []
+        
+        for i in 0..<9 {
+            
+            var item = ShopItem.random()
+            item.position = i
+            self.shopItems.append(item)
+        }
+        
+        return true
+        
+    }
+    
+    
+    
+    func findItem(item: ShopItem) -> ShopItem? {
+        for temp in shopItems {
+            if temp.key == item.key {
+                return temp
+            }
+        }
+        return nil
+    }
+    
+    
+    func remove(shopItem: ShopItem) -> Bool {
+        
+        if var item = findItem(item: shopItem) {
+            if item.count >= shopItem.count {
+                item.count -= shopItem.count
+                
+                if item.count == 0 {
+                    self.shopItems = self.shopItems.filter {
+                        $0.key != item.key
+                    }
+                }
+                
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    
     
     
     

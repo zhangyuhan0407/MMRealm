@@ -11,6 +11,73 @@ import Kitura
 import OCTJSON
 import OCTFoundation
 
+
+class MMMissionMiddleware: RouterMiddleware {
+    
+    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        guard let key = request.parameters["key"],
+                let id = request.parameters["missionid"],
+                let missionID = Int(id)
+        else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(OCTResponse.ShouldLogin).end()
+            return
+        }
+        
+        
+        if missionID < 0 {
+            user.refreshMission()
+            let dict: [String: Any] = ["missionlevels": user.missionLevels]
+            try response.send(OCTResponse.Succeed(data: JSON(dict))).end()
+            return
+        }
+        
+        else {
+            if user.has(mission: missionID) {
+                
+                
+                guard let json = request.jsonBody else {
+                    try response.send(OCTResponse.InputFormatError).end()
+                    return
+                }
+                
+                
+                let slotKeys = json["slots"].stringArray!
+                
+                
+                user.remove(mission: missionID)
+                let ret = user.gainSlots(keys: slotKeys)
+                
+                try response.send(OCTResponse.Succeed(data: JSON(ret))).end()
+                return
+            }
+            
+            else {
+                try response.send(OCTResponse.InputFormatError).end()
+                return
+            }
+        }
+        
+        
+        
+    }
+    
+    
+    
+    
+    
+    
+}
+
+
+
+
 //
 //class MMBaoshiMiddleware: RouterMiddleware {
 //    
@@ -138,66 +205,91 @@ import OCTFoundation
 //    
 //    
 //}
-//
-//
-//
-//
-class MMSlotsMiddleware: RouterMiddleware {
-    
-    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
-        guard let key = request.parameters["key"]
-            //            let battleid = request.parameters["battleid"] as? Int
-            else {
-                try response.send(OCTResponse.InputFormatError).end()
-                return
-        }
-        
-        guard let json = request.jsonBody,
-            let properties = json["properties"].intDictionary,
-            let invs = json["invs"].array
-            else {
-                try response.send(OCTResponse.InputFormatError).end()
-                return
-        }
-        
-        guard let user = MMUserManager.sharedInstance.find(key: key) else {
-            try response.send(OCTResponse.ShouldLogin).end()
-            return
-        }
-        
-        
-        for k in properties.keys {
-            if k == kGold {
-                user.gold += properties[k]!
-            } else if k == kYuanBao {
-                user.yuanbao += properties[k]!
-            }
-        }
-        
-        
-        for inv in invs {
-            
-            let category = MMCategory.deserialize(fromString: inv[kCategory].stringValue)
-            
-            switch category {
-            case .weapon:
-                user.add(weapon: MMWeapon.deserialize(fromJSON: inv))
-            case .armor:
-                user.add(armor: MMArmor.deserialize(fromJSON: inv))
-            case .trinket:
-                user.add(trinket: MMTrinket.deserialize(fromJSON: inv))
-            case .misc:
-                user.add(misc: MMMisc.deserialize(fromJSON: inv))
-            }
 
-        }
-        
-        
-        try response.send(OCTResponse.Succeed(data: user.bagJSON)).end()
-        
-        
-    }
-    
-    
-}
+
+
+
+//class MMSlotsMiddleware: RouterMiddleware {
+//    
+//    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+//        guard let key = request.parameters["key"],
+//                let id = (request.parameters["battleid"]),
+//                let battleid = Int(id)
+//        else {
+//            try response.send(OCTResponse.InputFormatError).end()
+//            return
+//        }
+//        
+//        
+//        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+//            try response.send(OCTResponse.ShouldLogin).end()
+//            return
+//        }
+//        
+//        
+//        if battleid < user.dungeonLevel {
+//            try response.send(OCTResponse.InputFormatError).end()
+//            return
+//        }
+//        
+//        
+//        
+//        
+//        
+//        guard let json = request.jsonBody,
+//            let properties = json["properties"].intDictionary,
+//            let invs = json["invs"].array
+//            else {
+//                try response.send(OCTResponse.InputFormatError).end()
+//                return
+//        }
+//        
+//        
+//        
+//        
+//        
+//        
+//        
+//        
+//        
+//        for k in properties.keys {
+//            if k == kGold {
+//                user.gold += properties[k]!
+//            } else if k == kYuanBao {
+//                user.yuanbao += properties[k]!
+//            }
+//        }
+//        
+//        
+//        for inv in invs {
+//            
+//            let category = MMCategory.deserialize(fromString: inv[kCategory].stringValue)
+//            
+//            switch category {
+//            case .weapon:
+//                user.add(weapon: MMWeapon.deserialize(fromJSON: inv))
+//            case .armor:
+//                user.add(armor: MMArmor.deserialize(fromJSON: inv))
+//            case .trinket:
+//                user.add(trinket: MMTrinket.deserialize(fromJSON: inv))
+//            case .misc:
+//                user.add(misc: MMMisc.deserialize(fromJSON: inv))
+//            }
+//
+//        }
+//        
+//        
+//        try response.send(OCTResponse.Succeed(data: user.bagJSON)).end()
+//        
+//        
+//    }
+//    
+//    
+//}
+
+
+
+
+
+
 

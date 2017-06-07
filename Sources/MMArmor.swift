@@ -75,8 +75,8 @@ struct MMArmor: MMInventory {
         ret.type = MMArmorType.deserialize(from: json[kType].stringValue)
         
         
-        ret.hp = json[kHP].int!
-        ret.def = json[kDEF].int!
+        ret.hp = json[kHP].int ?? 0
+        ret.def = json[kDEF].int ?? 0
         
         
         ret.shanbi = json[kShanBi].int ?? 0

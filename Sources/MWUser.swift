@@ -48,7 +48,7 @@ class MMUserMiddleware: RouterMiddleware {
         
         
         
-        guard let user = MMUserDAO.sharedInstance.findOne(id: key) else {
+        guard let user = MMUserDAO.sharedInstance.load(user: key) else {
             try response.send(OCTResponse.UserNotExists).end()
             return
         }
@@ -63,7 +63,7 @@ class MMUserMiddleware: RouterMiddleware {
     
     
     
-    //zyh!!  注册大礼包 数据驱动
+    
     func post(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
         
         guard let key = request.parameters[kKey] else {
@@ -72,18 +72,15 @@ class MMUserMiddleware: RouterMiddleware {
         }
         
         
-        if let _ = MMUserDAO.sharedInstance.findOne(id: key) {
+        if let _ = MMUserDAO.sharedInstance.load(user: key) {
             try response.send(OCTResponse.UserExists).end()
             return
         }
         
         
-        let newUser = MMUser.create(key: key)
+        let newUser = MMUserDAO.sharedInstance.createUser(key: key)
         
-        
-//        
-//        newUser.bag = JSON([:])
-//        
+          
         do {
             try MMUserDAO.sharedInstance.save(newUser)
         } catch {

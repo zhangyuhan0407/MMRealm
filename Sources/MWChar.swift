@@ -20,9 +20,17 @@ class MMCharMiddleware: RouterMiddleware {
         
         if method == "get" {
             try get(request: request, response: response, next: next)
-        } else if method == "put" {
+        }
+            
+        else if method == "post" {
+            try post(request: request, response: response, next: next)
+        }
+        
+        else if method == "put" {
             try put(request: request, response: response, next: next)
-        } else {
+        }
+        
+        else {
             next()
         }
         
@@ -48,6 +56,46 @@ class MMCharMiddleware: RouterMiddleware {
     }
     
     
+    
+    func post(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+    
+        guard let key = request.parameters["key"] else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(OCTResponse.ShouldLogin).end()
+            return
+        }
+        
+        
+        
+        guard let json = request.jsonBody else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        
+        let cardKey = json[kCardKey].string!
+        
+        
+        let charJSON = JSON.read(fromFile: "\(CardPath)/\(cardKey)")!
+        let card = MMCard.deserialize(fromJSON: charJSON)
+        let char = MMCharacter(card: card)
+        
+        user.add(card: char)
+        
+        try response.send(OCTResponse.Succeed(data: char.json)).end()
+        
+    }
+    
+    
+
+
+
     func put(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
         
         guard let key = request.parameters["key"] else {
@@ -88,6 +136,12 @@ class MMCharMiddleware: RouterMiddleware {
         try response.send(OCTResponse.EmptyResult).end()
         
     }
+    
+    
+    
+    
+    
+    
     
 }
 

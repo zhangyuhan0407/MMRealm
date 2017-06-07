@@ -18,47 +18,42 @@ class MMUserDAO {
     private init() {}
     
     
-    
-    func load(user key: String) -> MMUser {
-        let json = JSON.read(fromFile: "\(UserRepoPath)/\(key)")!
-
-        
-        let user = MMUser.deserialize(fromJSON: json)
-        
-        
-        loadBag(forUser: user)
-        loadChars(forUser: user)
-        
-        return user
+    //zyh!!  注册大礼包 数据驱动
+    func createUser(key: String) -> MMUser {
+        return MMUser()
     }
     
     
-    func findOne(id: String) -> MMUser? {
-        guard let json = JSON.read(fromFile: "\(UserRepoPath)/\(id)") else {
+    func load(user key: String) -> MMUser? {
+        
+        guard let json = JSON.read(fromFile: "\(UserRepoPath)/\(key)") else {
             return nil
         }
-      
-        
+
         let user = MMUser.deserialize(fromJSON: json)
+        
+        user.shopItems = []
+        for itemJSON in json["shopitems"].array ?? [] {
+            user.shopItems.append(ShopItem.deserialize(fromJSON: itemJSON))
+        }
         
         
         loadBag(forUser: user)
         loadChars(forUser: user)
-
         
         return user
     }
     
     
-    
-    func save(_ obj: MMUser) throws {
+    func save(_ user: MMUser) throws {
         
-        let json = obj.infoJSON
+        var json = user.infoJSON
+        json.update(value: user.shopItemJSON, forKey: "shopitems")
         
-        try json.description.write(toFile: "\(UserRepoPath)/\(obj.key)", atomically: true, inAppendMode: false)
+        try json.description.write(toFile: "\(UserRepoPath)/\(user.key)", atomically: true, inAppendMode: false)
         
-        saveBag(forUser: obj)
-        saveChars(forUser: obj)
+        saveBag(forUser: user)
+        saveChars(forUser: user)
         
     }
     

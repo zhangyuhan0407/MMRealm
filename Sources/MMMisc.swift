@@ -7,7 +7,17 @@
 //
 
 import Foundation
-import SwiftyJSON
+import OCTJSON
+
+
+
+enum MiscType: String {
+    case card
+    case prop
+    case none
+}
+
+
 
 
 struct MMMisc: MMInventory {
@@ -20,6 +30,7 @@ struct MMMisc: MMInventory {
     var count: Int = 0
     
     
+    var type: MiscType = .none
     var usage: String?
     var story: String?
     
@@ -40,21 +51,48 @@ struct MMMisc: MMInventory {
         ret.rarity = MMRarity.deserialize(fromString: json[kRarity].stringValue)
         ret.count = json[kCount].intValue
         
-        ret.usage = json[kUsage].stringValue
-        ret.story = json[kStory].stringValue
+        ret.type = MiscType(rawValue: json[kType].string!)!
+        ret.usage = json[kUsage].string
+        ret.story = json[kStory].string
         
         return ret
     }
     
     
     var dict: [String : Any] {
-        return [kKey: self.key,
-                kImageName: imageName,
-                kDisplayeName: displayName,
-                kCategory: category.description,
-                kRarity: rarity.description,
-                kCount: count] as [String: Any]
+        var ret = [kKey: self.key,
+                   kImageName: imageName,
+                   kDisplayeName: displayName,
+                   kCategory: category.description,
+                   kRarity: rarity.description,
+                   kCount: count,
+                   kType: type.rawValue
+            ] as [String: Any]
+        
+        if let usage = self.usage {
+            ret.updateValue(usage, forKey: kUsage)
+        }
+        
+        if let story = self.story {
+            ret.updateValue(story, forKey: kStory)
+        }
+        
+        return ret
     }
+    
+    
+    mutating func increase(count: Int) {
+        self.count += count
+    }
+    
+    mutating func decrease(count: Int) {
+        self.count -= count
+    }
+    
+    
+    
+    
+    
     
     
 }

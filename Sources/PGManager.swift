@@ -6,8 +6,8 @@
 //
 //
 
-import Foundation
-import PostgreSQL
+//import Foundation
+//import PostgreSQL
 
 
 //class PGManager {

@@ -9,9 +9,6 @@
 import Foundation
 
 
-
-
-
 let kKey = "key"
 let kLastLogin = "lastlogin"
 let kName = "name"
@@ -32,10 +29,11 @@ let kSkill2 = "skill2"
 let kUserKey = "userkey"
 let kVIPLevel = "viplevel"
 let kLevel = "level"
+let kDungeonLevel = "dungeonlevel"
 let kPVELevel = "pvelevel"
 let kPVPLevel = "pvplevel"
-let kYuanBao = "yuanbao"
 let kGold = "gold"
+let kSilver = "silver"
 
 let kCardKey = "cardkey"
 let kCard = "card"

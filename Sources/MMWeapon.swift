@@ -40,11 +40,13 @@ enum MMWeaponType: String {
         case .Axe:
             return ["dz_zhandou"]
         case .OneSword:
-            return ["dz_zhandou", "dz_kuangbao"]
+            return ["dz_zhandou", "zs_kuangbao"]
         case .Spear:
-            return []
+            return ["xd_mao", "xd_xiong"]
         case .Staff:
-            return []
+            return ["fs_bingshuang", "fs_huoyan", "fs_aoshu",
+                    "ms_shensheng", "ms_jielv", "ms_anying",
+                    "ss_huimie", "ss_tongku", "ss_emo"]
         case .TwoSword:
             return ["zs_wuqi", "qs_chengjie"]
         }
@@ -58,14 +60,7 @@ enum MMWeaponType: String {
     
     
     var displayName: String {
-        //        switch self {
-        //        case .OneSword:
-        //            return "单手剑"
-        //        default:
-        //            <#code#>
-        //        }
         return self.rawValue
-        
     }
     
     
@@ -108,7 +103,7 @@ struct MMWeapon: MMInventory {
     
     var key: String = "DEFAULT_KEY"
     var imageName: String = "DEFAULT_IMAGE_NAME"
-    var displayName: String = "DEFAULT_DISPLAY_NAME"
+    var displayName: String = "默认武器"
     var category: MMCategory = .weapon
     var rarity: MMRarity = .white
     var count: Int = 0
@@ -124,6 +119,10 @@ struct MMWeapon: MMInventory {
     var mingzhong: Int = 0
     var xixue = 0
     
+    
+    var avaliableCharacters: [String] {
+        return self.type.avaliableCharacters
+    }
     
     
     init() {

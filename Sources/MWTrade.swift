@@ -1,14 +1,108 @@
-////
-////  MMFabaoRepo.swift
-////  MMRealm
-////
-////  Created by yuhan zhang on 1/14/17.
-////
-////
 //
-//import Foundation
-//import OCTJSON
-//import OCTFoundation
+//  MMFabaoRepo.swift
+//  MMRealm
+//
+//  Created by yuhan zhang on 1/14/17.
+//
+//
+
+import Foundation
+import Kitura
+import OCTJSON
+import OCTFoundation
+
+
+class MMTradeMiddleware: RouterMiddleware {
+    
+    
+    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        guard let key = request.parameters["key"] else {
+                try response.send(OCTResponse.InputFormatError).end()
+                return
+        }
+        
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(OCTResponse.ShouldLogin).end()
+            return
+        }
+        
+        
+        guard let json = request.jsonBody
+        else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        
+        func toDictionary(json: JSON) -> [String: Any] {
+            
+            
+            let gold = json[kGold].int ?? 0
+            let silver = json[kSilver].int ?? 0
+            
+            
+            var weapons = [MMWeapon]()
+            for j in json[kWeapons].array! {
+                weapons.append(MMWeapon.deserialize(fromJSON: j))
+            }
+            
+            var armors = [MMArmor]()
+            for j in json[kArmors].array! {
+                armors.append(MMArmor.deserialize(fromJSON: j))
+            }
+            
+            var trinkets = [MMTrinket]()
+            for j in json[kTrinkets].array! {
+                trinkets.append(MMTrinket.deserialize(fromJSON: j))
+            }
+            
+            var miscs = [MMMisc]()
+            for j in json[kMiscs].array! {
+                miscs.append(MMMisc.deserialize(fromJSON: j))
+            }
+            
+            
+            
+            var ret = [String: Any]()
+            ret.updateValue(gold, forKey: "gold")
+            ret.updateValue(silver, forKey: kSilver)
+            ret.updateValue(weapons, forKey: "weapons")
+            ret.updateValue(armors, forKey: "armors")
+            ret.updateValue(trinkets, forKey: "trinkets")
+            ret.updateValue(miscs, forKey: "miscs")
+            
+            return ret
+        }
+        
+        let gain = toDictionary(json: json["gain"])
+        let cost = toDictionary(json: json["cost"])
+        
+        do {
+            try user.updateBag(gain: gain, cost: cost)
+        } catch {
+            fatalError()
+        }
+        
+        
+        try response.send(OCTResponse.EmptyResult).end()
+        
+        
+        
+        
+    }
+    
+    
+    
+}
+
+
+
+
+
+
+
 //
 //
 //enum MMCategory: CustomStringConvertible {
