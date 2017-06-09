@@ -472,7 +472,7 @@ extension MMUser {
     
     func findItem(item: ShopItem) -> ShopItem? {
         for temp in shopItems {
-            if temp.key == item.key {
+            if temp.position == item.position {
                 return temp
             }
         }
@@ -482,21 +482,37 @@ extension MMUser {
     
     func remove(shopItem: ShopItem) -> Bool {
         
-        if var item = findItem(item: shopItem) {
-            if item.count >= shopItem.count {
-                item.count -= shopItem.count
-                
-                if item.count == 0 {
-                    self.shopItems = self.shopItems.filter {
-                        $0.key != item.key
-                    }
-                }
-                
-                return true
+        
+        self.shopItems = self.shopItems.map {
+
+            if $0.position == shopItem.position {
+                var temp = $0
+                temp.count -= shopItem.count
+                return temp
             }
+            else {
+                return $0
+            }
+            
         }
         
-        return false
+        return true
+        
+//        if var item = findItem(item: shopItem) {
+//            if item.count >= shopItem.count {
+//                item.count -= shopItem.count
+//                
+//                if item.count == 0 {
+//                    self.shopItems = self.shopItems.filter {
+//                        $0.key != item.key
+//                    }
+//                }
+//                
+//                return true
+//            }
+//        }
+//        
+//        return false
     }
     
     
