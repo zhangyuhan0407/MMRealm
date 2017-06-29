@@ -16,12 +16,41 @@ class MMMissionMiddleware: RouterMiddleware {
     
     func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
         
-        guard let key = request.parameters["key"],
-                let id = request.parameters["missionid"],
-                let missionID = Int(id)
+        let method = request.method.rawValue.lowercased()
+        
+        if method == "get" {
+            try get(request: request, response: response, next: next)
+        } else if method == "post" {
+            try post(request: request, response: response, next: next)
+        } else if method == "put" {
+            try put(request: request, response: response, next: next)
+        } else if method == "delete" {
+            try delete(request: request, response: response, next: next)
+        }
         else {
             try response.send(OCTResponse.InputFormatError).end()
-            return
+        }
+        
+    }
+    
+    
+    
+    
+    func get(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        
+    }
+    
+    
+    //通关
+    func post(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        guard let key = request.parameters["key"],
+            let id = request.parameters["missionid"],
+            let missionID = Int(id)
+            else {
+                try response.send(OCTResponse.InputFormatError).end()
+                return
         }
         
         
@@ -37,7 +66,7 @@ class MMMissionMiddleware: RouterMiddleware {
             try response.send(OCTResponse.Succeed(data: JSON(dict))).end()
             return
         }
-        
+            
         else {
             if user.has(mission: missionID) {
                 
@@ -51,29 +80,84 @@ class MMMissionMiddleware: RouterMiddleware {
                 let slotKeys = json["slots"].stringArray!
                 
                 
-                user.remove(mission: missionID)
-                let ret = user.gainSlots(keys: slotKeys)
+                let isSucceed = user.complete(mission: missionID)
                 
-                try response.send(OCTResponse.Succeed(data: JSON(ret))).end()
-                return
+                if isSucceed {
+                    
+                    var ret = user.missionJSON
+                    
+                    ret["slots"] = JSON(user.gainSlots(keys: slotKeys))
+                    
+                    try response.send(OCTResponse.Succeed(data: ret)).end()
+                    
+                    return
+                }
+                else {
+                    fatalError("user.complete(mission: missionID)")
+                }
+                
             }
-            
+                
             else {
                 try response.send(OCTResponse.InputFormatError).end()
                 return
             }
         }
-        
-        
+
         
     }
     
     
     
+    //升级
+    func put(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        guard let key = request.parameters["key"],
+            let id = request.parameters["missionid"],
+            let missionID = Int(id)
+        else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(OCTResponse.ShouldLogin).end()
+            return
+        }
+        
+        
+        let index = user.upgrade(mission: missionID)
+        
+        let dict: [String: Any]
+        if index <= missionID {
+            dict = ["issucceed": false, "missionindex": index]
+        }
+        else {
+            dict = ["issucceed": true, "missionindex": index]
+        }
+        
+        try response.send(OCTResponse.Succeed(data: JSON(dict))).end()
+        
+    }
     
+    
+    
+    //删除
+    func delete(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        
+    }
     
     
 }
+
+
+
+
+
+
+
 
 
 

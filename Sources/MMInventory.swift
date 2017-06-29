@@ -50,46 +50,109 @@ class MMInventoryRepo {
         
         return MMInventoryRepo.deserialize(fromJSON: json)
         
-        
-//        let array = key.components(separatedBy: "_")
-//        let category = MMCategory.deserialize(fromString: array[1])
-//        let level = Int(array[2])!
-//        
-//        
-//        
-//        let randomNumber = Int.random()
-//        var rarity: MMRarity = .white
-//        if randomNumber < 10 {
-//            rarity = .purple
-//        } else if randomNumber < 30 {
-//            rarity = .blue
-//        } else if randomNumber < 60 {
-//            rarity = .green
-//        }
-//        
-//        
-//        switch category {
-//        case .weapon:
-//            var weapon = MMWeapon()
-//            weapon.key = NSUUID().description
-//            weapon.imageName = "\(array[0])_\(array[1])_\(category)_\(level)"
-//            weapon.rarity = rarity
-//            weapon.type = MMWeaponType.random()
-//            return weapon
-//        case .armor:
-//            var armor = MMArmor()
-//            armor.key = NSUUID().description
-//            armor.imageName = "\(array[0])_\(array[1])_\(category)_\(level)"
-//            armor.rarity = rarity
-//            armor.type = MMArmorType.random()
-//            return armor
-//        default:
-//            fatalError()
-//        }
-        
-        
-        
     }
+    
+    
+    
+    
+    static func convert(withKey key: String) -> MMInventory {
+        let json: JSON
+        let realKey: String
+        let count: Int
+        if key.contains("PROP_Gold") {
+            count = Int(key.components(separatedBy: "_").last!)!
+            realKey = key.components(separatedBy: "_").dropLast().joined(separator: "_")
+        }
+        else if key.contains("PROP_Gold") {
+            count = Int(key.components(separatedBy: "_").last!)!
+            realKey = key.components(separatedBy: "_").dropLast().joined(separator: "_")
+        }
+        else if key.contains("INV_Misc") {
+            count = Int(key.components(separatedBy: "_").last!)!
+            realKey = key.components(separatedBy: "_").dropLast().joined(separator: "_")
+        }
+        else {
+            count = 1
+            realKey = key
+
+        }
+
+        json = JSON.read(fromFile: "\(INVPath)/\(realKey)")!
+        
+        var inv = MMInventoryRepo.deserialize(fromJSON: json)
+        inv.count = count
+        
+        return inv
+    }
+    
+    
+    
+    
+    static func convert(withKeys keys: [String]) -> [MMInventory] {
+        return keys.map {
+            convert(withKey: $0)
+        }
+    }
+    
+    
+    static func toKey(inv: MMInventory) -> String {
+        switch inv.category {
+        case .misc:
+            let key = "\(inv.key)_\(inv.count)"
+            return key
+        default:
+            return inv.key
+        }
+    }
+    
+    
+    static func toKeys(invs: [MMInventory]) -> [String] {
+        return invs.map {
+            toKey(inv: $0)
+        }
+    }
+    
+    
+    static func toDictionary(json: JSON) -> [String: Any] {
+        
+        
+        let gold = json[kGold].int ?? 0
+        let silver = json[kSilver].int ?? 0
+        
+        
+        var weapons = [MMWeapon]()
+        for j in json[kWeapons].array ?? [] {
+            weapons.append(MMWeapon.deserialize(fromJSON: j))
+        }
+        
+        var armors = [MMArmor]()
+        for j in json[kArmors].array ?? [] {
+            armors.append(MMArmor.deserialize(fromJSON: j))
+        }
+        
+        var trinkets = [MMTrinket]()
+        for j in json[kTrinkets].array ?? [] {
+            trinkets.append(MMTrinket.deserialize(fromJSON: j))
+        }
+        
+        var miscs = [MMMisc]()
+        for j in json[kMiscs].array ?? [] {
+            miscs.append(MMMisc.deserialize(fromJSON: j))
+        }
+        
+        
+        
+        var ret = [String: Any]()
+        ret.updateValue(gold, forKey: "gold")
+        ret.updateValue(silver, forKey: kSilver)
+        ret.updateValue(weapons, forKey: "weapons")
+        ret.updateValue(armors, forKey: "armors")
+        ret.updateValue(trinkets, forKey: "trinkets")
+        ret.updateValue(miscs, forKey: "miscs")
+        
+        return ret
+    }
+    
     
     
     static func deserialize(fromJSON json: JSON) -> MMInventory {
@@ -108,38 +171,15 @@ class MMInventoryRepo {
     }
     
     
-//    func create(key: String, category: String, rarity: String?) -> MMWeapon {
-//
-//        let cate = MMCategory.deserialize(fromString: category)
-//
-//        let rar: MMRarity
-//        if let r = rarity {
-//            rar = MMRarity.deserialize(fromString: r)
-//        } else {
-//            rar = MMRarity.white
-//        }
-//
-//
-//        let ret = MMWeapon()
-//
-//        
-//        
-//        return ret
-//    }
+    
+    
+    
     
 }
 
 
 
-extension Int {
-    public static func random(max: Int = 100) -> Int {
-        #if os(Linux)
-            return Int(Glibc.random() % max)
-        #else
-            return Int(arc4random() % UInt32(max))
-        #endif
-    }
-}
+
 
 
 

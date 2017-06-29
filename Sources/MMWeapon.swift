@@ -111,13 +111,16 @@ struct MMWeapon: MMInventory {
     var type: MMWeaponType = .Rifle
     
     
+    var hp: Int = 0
+    var sp: Int = 0
     var atk: Int = 0
-    var mag: Int = 0
+    var def: Int = 0
     
     
     var baoji: Int = 0
     var mingzhong: Int = 0
-    var xixue = 0
+    var shanbi: Int = 0
+    var gedang: Int = 0
     
     
     var avaliableCharacters: [String] {
@@ -144,11 +147,14 @@ struct MMWeapon: MMInventory {
         ret.type = MMWeaponType.deserialize(from: json[kType].stringValue)
         
         
+        ret.hp = json[kHP].int ?? 0
+        ret.sp = json[kSP].int ?? 0
         ret.atk = json[kATK].int ?? 0
-        ret.mag = json[kMAG].int ?? 0
+        ret.def = json[kDef].int ?? 0
         ret.baoji = json[kBaoJi].int ?? 0
         ret.mingzhong = json[kMingZhong].int ?? 0
-        ret.xixue = json[kXiXue].int ?? 0
+        ret.gedang = json[kGeDang].int ?? 0
+        ret.shanbi = json[kShanBi].int ?? 0
         
         
         return ret
@@ -163,11 +169,14 @@ struct MMWeapon: MMInventory {
                 kRarity: rarity.description,
                 kCount: count,
                 kType: self.type.rawValue,
-                kATK: atk,
-                kMAG:mag,
+                kHP: self.hp,
+                kSP: self.sp,
+                kATK: self.atk,
+                kDef: self.def,
                 kBaoJi: baoji,
                 kMingZhong: mingzhong,
-                kXiXue: xixue
+                kShanBi: self.shanbi,
+                kGeDang: self.gedang
             ] as [String: Any]
     }
     
@@ -190,15 +199,6 @@ struct MMWeapon: MMInventory {
         ret.rarity = rarity
         ret.type = MMWeaponType.random()
         ret.imageName = "INV_Weapon_\(ret.type.rawValue)_\(level)"
-        
-        
-        let max = level * 40
-        
-        ret.atk = Int.random(max: max) + 1
-        ret.mag = Int.random(max: max) + 1
-        
-        ret.baoji = Int.random(max: 30) + 1
-        ret.mingzhong = Int.random(max: 30) + 1
         
         
         return ret

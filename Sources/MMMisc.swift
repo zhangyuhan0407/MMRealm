@@ -20,7 +20,7 @@ enum MiscType: String {
 
 
 
-struct MMMisc: MMInventory {
+final class MMMisc: MMInventory {
     
     var key: String = "DEFAULT_MISC"
     var imageName: String = "default_misc"
@@ -42,7 +42,7 @@ struct MMMisc: MMInventory {
     
     static func deserialize(fromJSON json: JSON) -> MMMisc {
         
-        var ret = MMMisc()
+        let ret = MMMisc()
         
         ret.key = json[kKey].stringValue
         ret.imageName = json[kImageName].stringValue
@@ -81,11 +81,11 @@ struct MMMisc: MMInventory {
     }
     
     
-    mutating func increase(count: Int) {
+    func increase(count: Int) {
         self.count += count
     }
     
-    mutating func decrease(count: Int) {
+    func decrease(count: Int) {
         self.count -= count
     }
     

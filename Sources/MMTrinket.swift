@@ -20,23 +20,16 @@ struct MMTrinket: MMInventory {
     var count: Int = 0
     
     
-    var hp = 0
-    
-    
+    var hp: Int = 0
+    var sp: Int = 0
     var atk: Int = 0
     var def: Int = 0
-    var mag: Int = 0
     
     
     var baoji: Int = 0
-    var shanbi: Int = 0
     var mingzhong: Int = 0
+    var shanbi: Int = 0
     var gedang: Int = 0
-    
-    var zaisheng = 0
-    var xixue = 0
-    var fantanwuli = 0
-    var fantanfashu = 0
     
     
     
@@ -57,18 +50,14 @@ struct MMTrinket: MMInventory {
         ret.count = json[kCount].intValue
         
         
+        ret.hp = json[kHP].int ?? 0
+        ret.sp = json[kSP].int ?? 0
         ret.atk = json[kATK].int ?? 0
-        ret.mag = json[kMAG].int ?? 0
+        ret.def = json[kDef].int ?? 0
         ret.baoji = json[kBaoJi].int ?? 0
         ret.mingzhong = json[kMingZhong].int ?? 0
-        ret.xixue = json[kXiXue].int ?? 0
-        
-        
-        ret.hp = json[kHP].int ?? 0
-        ret.def = json[kDEF].int ?? 0
-        ret.shanbi = json[kShanBi].int ?? 0
         ret.gedang = json[kGeDang].int ?? 0
-        ret.zaisheng = json[kZaiSheng].int ?? 0
+        ret.shanbi = json[kShanBi].int ?? 0
         
         
         return ret
@@ -82,22 +71,20 @@ struct MMTrinket: MMInventory {
                 kCategory: category.description,
                 kRarity: rarity.description,
                 kCount: count,
-                kATK: atk,
-                kMAG:mag,
+                kHP: self.hp,
+                kSP: self.sp,
+                kATK: self.atk,
+                kDef: self.def,
                 kBaoJi: baoji,
                 kMingZhong: mingzhong,
-                kXiXue: xixue,
-                kHP: hp,
-                kDEF: def,
-                kShanBi: shanbi,
-                kGeDang: gedang,
-                kZaiSheng: zaisheng
+                kShanBi: self.shanbi,
+                kGeDang: self.gedang
             ] as [String: Any]
     }
     
     
     static func random(level: Int) -> MMTrinket {
-        var ret = MMTrinket()
+        let ret = MMTrinket()
         
         
         return ret

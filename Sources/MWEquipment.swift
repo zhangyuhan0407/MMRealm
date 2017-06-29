@@ -44,7 +44,7 @@ class MMEquipmentMiddleware: RouterMiddleware {
         } else if type == "unequip" {
             unequip(user: user, char: char, category: category, json: json)
         } else {
-            fatalerror()
+            fatalError()
         }
         
         
@@ -81,7 +81,7 @@ class MMEquipmentMiddleware: RouterMiddleware {
                 _ = user.add(trinket: existing!)
             }
         default:
-            fatalerror()
+            fatalError()
         }
     }
     
@@ -107,7 +107,7 @@ class MMEquipmentMiddleware: RouterMiddleware {
                 _ = user.add(trinket: existing!)
             }
         default:
-            fatalerror()
+            fatalError()
         }
     }
     

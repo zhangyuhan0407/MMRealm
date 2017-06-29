@@ -16,9 +16,40 @@ class MMTradeMiddleware: RouterMiddleware {
     
     
     func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        let method = request.method.rawValue.lowercased()
+        
+        if method == "get" {
+            try get(request: request, response: response, next: next)
+        }
+        else if method == "post" {
+            try post(request: request, response: response, next: next)
+        }
+        else if method == "put" {
+            try put(request: request, response: response, next: next)
+        }
+        else if method == "delete" {
+            try delete(request: request, response: response, next: next)
+        }
+        
+        
+        
+    }
+    
+    
+    
+    func get(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        
+    }
+    
+    
+    
+    func post(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
         guard let key = request.parameters["key"] else {
-                try response.send(OCTResponse.InputFormatError).end()
-                return
+            try response.send(OCTResponse.InputFormatError).end()
+            return
         }
         
         
@@ -29,69 +60,53 @@ class MMTradeMiddleware: RouterMiddleware {
         
         
         guard let json = request.jsonBody
-        else {
-            try response.send(OCTResponse.InputFormatError).end()
-            return
+            else {
+                try response.send(OCTResponse.InputFormatError).end()
+                return
         }
         
         
         
-        func toDictionary(json: JSON) -> [String: Any] {
-            
-            
-            let gold = json[kGold].int ?? 0
-            let silver = json[kSilver].int ?? 0
-            
-            
-            var weapons = [MMWeapon]()
-            for j in json[kWeapons].array! {
-                weapons.append(MMWeapon.deserialize(fromJSON: j))
-            }
-            
-            var armors = [MMArmor]()
-            for j in json[kArmors].array! {
-                armors.append(MMArmor.deserialize(fromJSON: j))
-            }
-            
-            var trinkets = [MMTrinket]()
-            for j in json[kTrinkets].array! {
-                trinkets.append(MMTrinket.deserialize(fromJSON: j))
-            }
-            
-            var miscs = [MMMisc]()
-            for j in json[kMiscs].array! {
-                miscs.append(MMMisc.deserialize(fromJSON: j))
-            }
-            
-            
-            
-            var ret = [String: Any]()
-            ret.updateValue(gold, forKey: "gold")
-            ret.updateValue(silver, forKey: kSilver)
-            ret.updateValue(weapons, forKey: "weapons")
-            ret.updateValue(armors, forKey: "armors")
-            ret.updateValue(trinkets, forKey: "trinkets")
-            ret.updateValue(miscs, forKey: "miscs")
-            
-            return ret
-        }
-        
-        let gain = toDictionary(json: json["gain"])
-        let cost = toDictionary(json: json["cost"])
+//        let gain = toDictionary(json: json["gain"])
+        let inv = MMInventoryRepo.create(withKey: json["result"].string!)
+        let cost = MMInventoryRepo.toDictionary(json: json["cost"])
         
         do {
-            try user.updateBag(gain: gain, cost: cost)
+            if inv.key.contains("Weapon") {
+                try user.updateBag(gain: ["weapons": [inv]], cost: cost)
+            }
+            else if inv.key.contains("Armor") {
+                try user.updateBag(gain: ["armors": [inv]], cost: cost)
+            }
+            else {
+                try user.updateBag(gain: ["trinkets": [inv]], cost: cost)
+            }
+            try response.send(OCTResponse.Succeed(data: inv.json)).end()
         } catch {
-            fatalError()
+            try response.send(OCTResponse.DatabaseError).end()
         }
-        
-        
-        try response.send(OCTResponse.EmptyResult).end()
         
         
         
         
     }
+    
+    
+    
+    func put(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        
+    }
+    
+    
+    func delete(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        
+        
+    }
+    
+    
+    
+    
     
     
     
@@ -111,7 +126,7 @@ class MMTradeMiddleware: RouterMiddleware {
 //    case trinket
 //    case misc
 //
-//    
+//
 //    var description: String {
 //        switch self {
 //        case .weapon:

@@ -1,23 +1,14 @@
 
 
 import Foundation
-
 import Kitura
-
 import OCTJSON
 import OCTFoundation
 
 
+
+
 let router = Router()
-
-
-
-//MARK:- Card
-
-
-
-//router.post("/user/:user/card/:card", middleware: MMCharacterMiddleware())
-
 
 
 
@@ -33,14 +24,16 @@ router.post("/user/:key/equipment/:type", middleware: MMEquipmentMiddleware())
 //MARK:- Chars 
 
 
+//获取卡牌
+router.get("/user/:key/chars", middleware: MMCharacterMiddleware())
 
-router.get("/user/:key/chars", middleware: MMCharMiddleware())
+//保存阵型
+router.put("/user/:key/chars", middleware: MMCharacterMiddleware())
+
+//获得卡牌
+router.post("/user/:key/chars", middleware: MMCharacterMiddleware())
 
 
-router.put("/user/:key/chars", middleware: MMCharMiddleware())
-
-
-router.post("/user/:key/chars", middleware: MMCharMiddleware())
 
 
 
@@ -48,7 +41,7 @@ router.post("/user/:key/chars", middleware: MMCharMiddleware())
 
 
 
-
+//查看背包
 router.get("/user/:key/bag") { (request, response, next) in
     
     guard let key = request.parameters["key"] else {
@@ -70,13 +63,24 @@ router.get("/user/:key/bag") { (request, response, next) in
 
 
 
-//router.post("/user/:key/bag/update", middleware: MMUpdateBagMiddleware())
 
+
+//MARK:- Bag
+
+
+//保存背包其中某一类型
 router.post("/user/:key/bag/:type", middleware: MMBagMiddleware())
 
 
+//分解物品
+router.post("/user/:key/disenchant", middleware: MMDisenchantMiddleware())
 
 
+
+//MARK:- Trade
+
+
+//打造武器
 router.post("/user/:key/trade", middleware: MMTradeMiddleware())
 
 
@@ -87,98 +91,70 @@ router.post("/user/:key/trade", middleware: MMTradeMiddleware())
 //router.post("/user/:key/battle/:battleid/slots", middleware: MMSlotsMiddleware())
 
 
+
+
+//MARK:- Dungeon
+
+
+//通关地下城
 router.post("/user/:key/dungeon/:battleid", middleware: MMDungeonMiddleware())
 
 
+
+
+
+//MARK:- Mission
+
+
+
+//通关任务
 router.post("/user/:key/mission/:missionid", middleware: MMMissionMiddleware())
 
+//升级任务
+router.put("/user/:key/mission/:missionid", middleware: MMMissionMiddleware())
 
-//router.get("/user/:key/message") { (request, response, next) in
-//    
-//    guard let key = request.parameters["key"] else {
-//        try response.send(OCTResponse.InputFormatError).end()
-//        return
-//    }
-//    
-//    
-//    let message = MMUserManager.sharedInstance.findMessage(forUser: key)
-//    
-//    
-//    try response.send(JSON(message)).end()
-//    
-//    
-//}
+
+//Ticket
+
+//购买入场券
+router.post("/user/:key/ticket", middleware: MMTicketMiddleware())
+
+//使用入场券
+router.post("/user/:key/gamestate", middleware: MMGameStateMiddleware())
 
 
 
 
-// Fabao
+
+//shop
 
 
-
-//router.get("/user/:key/fabao", middleware: MMFabaoMiddleware())
-
-///打造法宝
-//router.post("/user/:key/fabao/forge", middleware: MMFabaoMiddleware())
-
-///购买法宝
-//router.post("/user/:key/fabao/buy") { (request, response, next) in
-//    
-//    guard let key = request.parameters["key"] else {
-//        try response.send(OCTResponse.InputFormatError).end()
-//        return
-//    }
-//    
-//    
-//    guard let json = request.jsonBody,
-//        let fabaoString = json["fabao"].string,
-//        let cost = json["cost"].intDictionary
-//    else {
-//        try response.send(OCTResponse.InputFormatError).end()
-//        return
-//    }
-//    
-//    
-//    Logger.debug("URL: \(request.matchedPath), Body: \(json)")
-//
-//    
-//    guard let user = MMUserManager.sharedInstance.find(key: key) else {
-//        try response.send(OCTResponse.ShouldLogin).end()
-//        return
-//    }
-//    
-//    
-//    guard let fabao = MMFabao.deserialize(fromString: fabaoString) else {
-//        try response.send(OCTResponse.InputFormatError).end()
-//        return
-//    }
-//    
-//    
-//    do {
-//        try user.buyFabao(fabao: fabao, cost: cost)
-//        try response.send(OCTResponse.EmptyResult).end()
-//    } catch {
-//        try response.send(OCTResponse.ServerError).end()        
-//    }
-//    
-//    
-//}
-
-
-
-//store
-
-
-
+//查看商城
 router.get("/user/:key/shop", middleware: MMShopMiddleware())
 
-
+//购买物品
 router.post("/user/:key/shop", middleware: MMShopMiddleware())
 
-
+//刷新商城
 router.put("/user/:key/shop", middleware: MMShopMiddleware())
 
 
+
+
+///MARK:- MailBox
+
+
+//查看Mail
+router.get("/user/:key/mailbox/:mailkey", middleware: MMMailBoxMiddleware())
+
+//获取Mail奖励
+router.post("/user/:key/mailbox/:mailkey", middleware: MMMailBoxMiddleware())
+
+//获得Mail奖励
+router.put("/user/:key/mailbox/:mailkey", middleware: MMMailBoxMiddleware())
+
+//删除Mail
+router.delete("/user/:key/mailbox/:mailkey", middleware: MMMailBoxMiddleware())
 
 
 

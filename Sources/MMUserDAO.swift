@@ -20,26 +20,42 @@ class MMUserDAO {
     
     //zyh!!  注册大礼包 数据驱动
     func createUser(key: String) -> MMUser {
-        return MMUser()
+        let user = MMUser()
+        
+        
+        user.key = key
+        
+        
+        var mail = ENMail(key: UUID().description)
+        mail.sour = "xxxx"
+        mail.dest = user.key
+        mail.sourDisplayName = "系统邮件"
+
+        mail.title = ""
+        mail.info = "..."
+        
+        mail.rewards = ["PROP_Gold_999"]
+        user.add(mail: mail)
+        
+        return user
     }
+    
+    
+    
     
     
     func load(user key: String) -> MMUser? {
         
-        guard let json = JSON.read(fromFile: "\(UserRepoPath)/\(key)") else {
+        guard let user = loadInfo(forUserKey: key) else {
             return nil
         }
-
-        let user = MMUser.deserialize(fromJSON: json)
-        
-        user.shopItems = []
-        for itemJSON in json["shopitems"].array ?? [] {
-            user.shopItems.append(ShopItem.deserialize(fromJSON: itemJSON))
-        }
         
         
+        //ShopItem
+        //Mission
         loadBag(forUser: user)
         loadChars(forUser: user)
+        loadMail(forUser: user)
         
         return user
     }
@@ -47,19 +63,30 @@ class MMUserDAO {
     
     func save(_ user: MMUser) throws {
         
-        var json = user.infoJSON
-        json.update(value: user.shopItemJSON, forKey: "shopitems")
-        
-        try json.description.write(toFile: "\(UserRepoPath)/\(user.key)", atomically: true, inAppendMode: false)
-        
+        saveInfo(forUser: user)
         saveBag(forUser: user)
         saveChars(forUser: user)
+        saveMails(forUser: user)
         
     }
     
     
     
+    
+    
     //MARK:- Save
+    
+    
+    func saveInfo(forUser user: MMUser) {
+        var json = user.infoJSON
+        json["shopitems"] = user.shopItemJSON
+        
+        do {
+            try json.description.write(toFile: "\(UserRepoPath)/\(user.key)", atomically: true, inAppendMode: false)
+        } catch {
+            fatalError()
+        }
+    }
     
     
     
@@ -85,18 +112,15 @@ class MMUserDAO {
     }
     
     
+    func saveMails(forUser user: MMUser) {
+        do {
+            try user.mailsJSON.description.write(toFile: "\(UserMailBoxPath)/\(user.key)", atomically: false, inAppendMode: false)
+        } catch {
+            fatalError()
+        }
+    }
     
-//    func saveFabao(forUser user: MMUser) throws {
-//        
-//        var jsons = [JSON]()
-//        
-//        for c in user.fabao {
-//            jsons.append(c.json)
-//        }
-//        
-//        try JSON(jsons).description.write(toFile: "\(UserFabaoRepoPath)/\(user.key)", atomically: false, inAppendMode: false)
-//        
-//    }
+  
     
     
     
@@ -104,31 +128,21 @@ class MMUserDAO {
     
     
     
-//    func loadFabao(forUser user: MMUser) -> Bool {
-//        let s = String.read(fromFile: "\(UserFabaoRepoPath)/\(user.key)") ?? "[]"
-//        
-//        do {
-//            var temp = [MMFabao]()
-//            
-//            let json = try JSON.deserialize(s)
-//            
-//            let array = json.array!
-//            
-//            for fb in array {
-//                
-//                if let fabao = MMFabao.deserialize(fromJSON: fb) {
-//                    temp.append(fabao)
-//                }
-//            }
-//            
-//            user.fabao = temp
-//            
-//        } catch {
-//            return false
-//        }
-//        
-//        return true
-//    }
+    func loadInfo(forUserKey key: String) -> MMUser? {
+        guard let json = JSON.read(fromFile: "\(UserRepoPath)/\(key)") else {
+            return nil
+        }
+        
+        let user = MMUser.deserialize(fromJSON: json)
+        
+        user.shopItems = []
+        for itemJSON in json["shopitems"].array! {
+            user.shopItems.append(ShopItem.deserialize(fromJSON: itemJSON))
+        }
+        
+        return user
+        
+    }
     
     
     @discardableResult
@@ -162,7 +176,9 @@ class MMUserDAO {
             case "misc":
                 var temp = [MMMisc]()
                 for json in jsonArray {
-                    temp.append(MMMisc.deserialize(fromJSON: json))
+                    var misc = MMMisc.deserialize(fromJSON: json)
+                    misc.count = json["count"].int ?? 1
+                    temp.append(misc)
                 }
                 user.miscs = temp
             default:
@@ -186,7 +202,6 @@ class MMUserDAO {
         } catch {
             Logger.error("JSON Format Error: --- \(s)")
             fatalError()
-            return false
         }
         
         return true
@@ -216,8 +231,30 @@ class MMUserDAO {
     }
     
     
+    @discardableResult
+    func loadMail(forUser user: MMUser) -> Bool {
+        let json = JSON.read(fromFile: "\(UserMailBoxPath)/\(user.key)")!
+        
+        
+        var ret = [ENMail]()
+        let array = json.array!
+        
+        for j in array {
+            let mail = ENMail.deserialize(fromJSON: j)
+            ret.append(mail)
+        }
+        
+        user.mails = ret
+        return true
+        
+    }
+    
     
 }
+
+
+
+
 
 
 

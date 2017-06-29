@@ -78,6 +78,11 @@ class MMShopMiddleware: RouterMiddleware {
         
         let item = ShopItem.deserialize(fromJSON: itemJSON)
         
+        if item.key == "PROP_Gold" {
+            user.add(gold: item.count)
+            try response.send(OCTResponse.EmptyResult).end()
+            return
+        }
         
         user.remove(shopItem: item)
 

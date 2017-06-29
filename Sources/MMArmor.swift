@@ -49,14 +49,16 @@ struct MMArmor: MMInventory {
     var type = MMArmorType.Cloth
     
     
-    var hp = 0
+    var hp: Int = 0
+    var sp: Int = 0
+    var atk: Int = 0
     var def: Int = 0
     
     
+    var baoji: Int = 0
+    var mingzhong: Int = 0
     var shanbi: Int = 0
     var gedang: Int = 0
-    
-    var zaisheng = 0
     
     
     
@@ -76,12 +78,13 @@ struct MMArmor: MMInventory {
         
         
         ret.hp = json[kHP].int ?? 0
-        ret.def = json[kDEF].int ?? 0
-        
-        
-        ret.shanbi = json[kShanBi].int ?? 0
+        ret.sp = json[kSP].int ?? 0
+        ret.atk = json[kATK].int ?? 0
+        ret.def = json[kDef].int ?? 0
+        ret.baoji = json[kBaoJi].int ?? 0
+        ret.mingzhong = json[kMingZhong].int ?? 0
         ret.gedang = json[kGeDang].int ?? 0
-        ret.zaisheng = json[kZaiSheng].int ?? 0
+        ret.shanbi = json[kShanBi].int ?? 0
         
         return ret
     }
@@ -95,11 +98,14 @@ struct MMArmor: MMInventory {
                 kRarity: rarity.description,
                 kCount: count,
                 kType: self.type.rawValue,
-                kHP: hp,
-                kDEF: def,
-                kShanBi: shanbi,
-                kGeDang: gedang,
-                kZaiSheng: zaisheng
+                kHP: self.hp,
+                kSP: self.sp,
+                kATK: self.atk,
+                kDef: self.def,
+                kBaoJi: baoji,
+                kMingZhong: mingzhong,
+                kShanBi: self.shanbi,
+                kGeDang: self.gedang
             ] as [String: Any]
     }
     

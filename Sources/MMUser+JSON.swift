@@ -78,6 +78,16 @@ extension MMUser {
     }
     
     
+    var missionJSON: JSON {
+        let dict: [String: Any] = ["missionlevels": self.missionLevels, "missioncompletecount": missionCompleteCount]
+        return JSON(dict)
+    }
+    
+    
+    var mailsJSON: JSON {
+        return JSON(self.mails.map { $0.json })
+    }
+    
     
     var json: JSON {
         var json = infoJSON

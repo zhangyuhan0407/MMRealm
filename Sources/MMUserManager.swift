@@ -34,7 +34,12 @@ class MMUserManager {
     
     
     func timeout(d1: Date, d2: Date) -> Bool {
-        return true
+        if (d2 - 3600) > d1 {
+            return true
+        }
+        
+        
+        return false
     }
     
     
@@ -42,8 +47,8 @@ class MMUserManager {
         let now = Date()
         for user in self.users {
             if timeout(d1: user.lastLogin, d2: now) {
-                debugPrint(now)
-                self.save(user: user)
+                debugPrint("\(user.key) ----- TIMEOUT")
+                self.destroy(user: user)
             }
         }
         
@@ -72,10 +77,8 @@ class MMUserManager {
     
     
     func destroy(user: MMUser) {
-        
         save(user: user)
         self.users = self.users.filter { $0.key != user.key }
-        
     }
     
     

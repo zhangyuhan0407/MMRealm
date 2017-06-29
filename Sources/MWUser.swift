@@ -85,6 +85,7 @@ class MMUserMiddleware: RouterMiddleware {
             try MMUserDAO.sharedInstance.save(newUser)
         } catch {
             try response.send(OCTResponse.ServerError).end()
+            return
         }
         
         try response.send(newUser).end()

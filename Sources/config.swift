@@ -18,20 +18,24 @@ import OCTFoundation
     let UserRepoPath =          "/home/ubuntu/Developer/MMRealm/UserRepo"
     let UserFabaoRepoPath =     "/home/ubuntu/Developer/MMRealm/UserFabaoRepo"
     let UserBagRepoPath =       "/home/ubuntu/Developer/MMRealm/UserBagRepo"
+    let UserMailBoxPath =       "/home/ubuntu/Developer/MMRealm/UserMailBoxRepo"
     
     
     let INVPath =               "/home/ubuntu/Developer/MMFileServer/invs"
     let CardPath =              "/home/ubuntu/Developer/MMFileServer/cards"
+    let ShopItemPath =          "/home/ubuntu/Developer/MMFileServer/ShopItems"
 #else
     let BasePath =              "/Users/yorg/Developer/MMRealm"
     let UserCharRepoPath =      "/Users/yorg/Developer/MMRealm/UserCharRepo"
     let UserRepoPath =          "/Users/yorg/Developer/MMRealm/UserRepo"
     let UserFabaoRepoPath =     "/Users/yorg/Developer/MMRealm/UserFabaoRepo"
     let UserBagRepoPath =       "/Users/yorg/Developer/MMRealm/UserBagRepo"
+    let UserMailBoxPath =       "/Users/yorg/Developer/MMRealm/UserMailBoxRepo"
     
     
     let INVPath =               "/Users/yorg/Developer/MMFileServer/invs"
     let CardPath =              "/Users/yorg/Developer/MMFileServer/cards"
+    let ShopItemPath =          "/Users/yorg/Developer/MMFileServer/ShopItems"
 #endif
 
 
@@ -84,12 +88,6 @@ extension RouterRequest {
 
 
 
-func fatalerror(_ s: String = "") {
-    fatalError(s)
-}
-
-
-
 
 
 extension MMMisc {
@@ -100,6 +98,30 @@ extension MMMisc {
         
         return ret
     }
+}
+
+
+extension Int {
+    public static func random(max: Int = 100) -> Int {
+        #if os(Linux)
+            return Int(Glibc.random() % max)
+        #else
+            return Int(arc4random() % UInt32(max))
+        #endif
+    }
+}
+
+
+struct OORandom {
+    
+    static func happens(inPosibility number: Int) -> Bool {
+        if Int.random() < number {
+            return true
+        }
+        
+        return false
+    }
+    
 }
 
 
