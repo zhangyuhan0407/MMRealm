@@ -54,11 +54,11 @@ final class MMCharacter: JSONDeserializable {
     static func deserialize(fromJSON json: JSON) -> MMCharacter {
 
         
-        let card = MMCard(json[kCardKey].stringValue)
+        let card = MMCard(json[kCardKey].string ?? json[kKey].string!)
         let ret = MMCharacter(card: card)
         
         
-        ret.position = json["position"].intValue
+        ret.position = json["position"].int ?? 0
         
         
         if let _ = json["weapon"]["key"].string {

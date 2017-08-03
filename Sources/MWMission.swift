@@ -38,6 +38,19 @@ class MMMissionMiddleware: RouterMiddleware {
     
     func get(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
         
+        guard let key = request.parameters["key"]
+        else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(OCTResponse.ShouldLogin).end()
+            return
+        }
+        
+        
+        try response.send(OCTResponse.Succeed(data: user.missionJSON)).end()
         
     }
     
@@ -60,16 +73,23 @@ class MMMissionMiddleware: RouterMiddleware {
         }
         
         
-        if missionID < 0 {
-            user.refreshMission()
-            let dict: [String: Any] = ["missionlevels": user.missionLevels]
-            try response.send(OCTResponse.Succeed(data: JSON(dict))).end()
-            return
-        }
+//        if missionID < 0 {
+//            let isSucceed = user.refreshMission()
+//            if isSucceed {
+//                _ = user.remove(silver: 100)
+//                let dict: [String: Any] = ["missionlevels": user.missionLevels]
+//                try response.send(OCTResponse.Succeed(data: JSON(dict))).end()
+//                return
+//            }
+//            else {
+//                try response.send(OCTResponse.ServerError).end()
+//                return
+//            }
+//        }
+        
             
-        else {
+//        else {
             if user.has(mission: missionID) {
-                
                 
                 guard let json = request.jsonBody else {
                     try response.send(OCTResponse.InputFormatError).end()
@@ -102,7 +122,7 @@ class MMMissionMiddleware: RouterMiddleware {
                 try response.send(OCTResponse.InputFormatError).end()
                 return
             }
-        }
+//        }
 
         
     }
@@ -127,17 +147,15 @@ class MMMissionMiddleware: RouterMiddleware {
         }
         
         
-        let index = user.upgrade(mission: missionID)
-        
-        let dict: [String: Any]
-        if index <= missionID {
-            dict = ["issucceed": false, "missionindex": index]
+        let isSucceed = user.upgrade(mission: missionID)
+
+        if isSucceed {
+            let m = user.findMission(index: missionID)!
+            try response.send(OCTResponse.Succeed(data: m.json)).end()
         }
         else {
-            dict = ["issucceed": true, "missionindex": index]
+            try response.send(OCTResponse.DatabaseError).end()
         }
-        
-        try response.send(OCTResponse.Succeed(data: JSON(dict))).end()
         
     }
     
@@ -146,6 +164,24 @@ class MMMissionMiddleware: RouterMiddleware {
     //删除
     func delete(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
         
+        guard let key = request.parameters["key"],
+            let id = request.parameters["missionid"],
+            let missionID = Int(id)
+            else {
+                try response.send(OCTResponse.InputFormatError).end()
+                return
+        }
+        
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(OCTResponse.ShouldLogin).end()
+            return
+        }
+        
+        
+        _ = user.remove(mission: missionID)
+        
+        try response.send(OCTResponse.EmptyResult).end()
         
     }
     

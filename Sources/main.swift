@@ -15,6 +15,8 @@ let router = Router()
 //MARK:- Equipment
 
 
+router.post("/user/:key/npc", middleware: MMNPCMiddleware())
+
 
 router.post("/user/:key/equipment/:type", middleware: MMEquipmentMiddleware())
 
@@ -61,6 +63,8 @@ router.get("/user/:key/bag") { (request, response, next) in
 }
 
 
+
+router.post("/user/:key/reward", middleware: MMRewardMiddleware())
 
 
 
@@ -123,6 +127,7 @@ router.post("/user/:key/ticket", middleware: MMTicketMiddleware())
 router.post("/user/:key/gamestate", middleware: MMGameStateMiddleware())
 
 
+router.delete("/user/:key/gamestate", middleware: MMGameStateMiddleware())
 
 
 
@@ -158,6 +163,66 @@ router.delete("/user/:key/mailbox/:mailkey", middleware: MMMailBoxMiddleware())
 
 
 
+
+///MARK:- Area
+
+
+router.get("/user/:key/area/:area", middleware: MMAreaMiddleware())
+
+router.post("/user/:key/area", middleware: MMAreaMiddleware())
+
+
+
+///MARK:- Explore
+
+
+
+
+
+router.post("/user/:key/explore/:type", middleware: MMExploreMiddleware())
+
+
+
+
+///MARK:- Day
+
+
+router.post("/user/:key/day", middleware: MMDayMiddleware())
+
+
+
+///MARK:- Investment
+
+
+router.get("/user/:key/investment", middleware: MMInvestmentMiddleware())
+
+router.post("/user/:key/investment", middleware: MMInvestmentMiddleware())
+
+
+router.get("/investment/:key") { request, response, next in
+    
+    guard let key = request.parameters["key"]
+        else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+    }
+    
+    
+    let keys = key.components(separatedBy: "-")
+    
+    let a = MMInvestmentRepo.sharedInstance.findInvestments(keys: keys)
+    var ret = [JSON]()
+    for aa in a {
+        var j = aa.json
+        ret.append(aa.json)
+    }
+    
+    try response.send(OCTResponse.Succeed(data: JSON(ret))).end()
+    
+}
+
+
+
 //MARK:- User
 
 
@@ -173,8 +238,24 @@ router.delete("/user/:key", middleware: MMUserMiddleware())
 
 
 
+#if os(Linux)
+    
+let myCertFile = "/tmp/Creds/1_maoyiqinwang.com_bundle.crt"
+let myKeyFile = "/tmp/Creds/2_maoyiqinwang.com.key"
+    
+    
+let mySSLConfig = SSLConfig(withCACertificateDirectory: "/tmp/Creds/",
+                            usingCertificateFile: myCertFile,
+                            withKeyFile: myKeyFile,
+                            usingSelfSignedCerts: false)
+    
+    Kitura.addHTTPServer(onPort: 8899, with: router)
+#else
+    Kitura.addHTTPServer(onPort: 8899, with: router)
+#endif
 
-Kitura.addHTTPServer(onPort: 8899, with: router)
+
+//Kitura.addHTTPServer(onPort: 8899, with: router)
 
 
 Kitura.run()

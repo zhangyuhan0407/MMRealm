@@ -10,78 +10,86 @@ import Foundation
 import OCTJSON
 
 
+
 final class MMUser: JSONDeserializable {
     
-    static var sharedInstance = MMUser()
-    
-    var messageQueue: [String: Any]!
-    
     var key: String = ""
-    var displayTitle = "列兵"
-    var displayName = "联盟战士"
+    var lastLogin: Date = Date()
+    var token: String = ""
+    var displayName = ""
+    var displayTitle = ""
+    var displayArea = ""
+    
+    
     var gold = 0
     var silver = 0
+    var vipLevel = 0
     
     
-    var vipLevel: Int = 0
-    var level: Int = 0
     
     
-    var hightestMissionCount = 0
+    var title = 0
+    var area = "area_1"
+    var day: Int = 0
+    var moveToken = 0
+    
+    var herilooms: [MMInventory] = []
+    
+    
+    
+    var bot = ENBot()
+    
     var gameState = 0
     var ticket = 0
-    var dungeonLevel = 0
-    var missionLevels: [Int] = []
-    var shopItems: [ShopItem] = []
+    
+    
+    
+    var shopItems: [ENShopItem] = []
     var mails: [ENMail] = []
+    var dungeons: [MYDungeon] = []
+    var missions: [MYMission] = []
+    var investments: [MYInvestment] = []
+    var areas: [MYArea] = []
     
-    var missionCompleteCount = 0
-    
-    var pvpLevel = 0
-    
-    var pveLevel: Int {
-        return self.dungeonLevel/100
-    }
+    var emotion = [0,0,0,0,0,0,0]
     
     
-    
-    var armyMaxCount: Int {
+    var maxMoveToken: Int {
         
-        if self.dungeonLevel < 104 {
-            return 2
-        }
-        else if self.dungeonLevel < 200 {
+        switch title {
+        case 1:
             return 3
-        }
-        else if self.dungeonLevel < 204 {
+        case 2:
             return 4
-        }
-        else if self.dungeonLevel < 209 {
+        case 3:
+            return 4
+        case 4:
             return 5
-        }
-        else if self.dungeonLevel < 304 {
+        case 5:
+            return 5
+        case 6:
             return 6
-        }
-        else if self.dungeonLevel < 404 {
+        case 7:
             return 7
+        default:
+            return 0
         }
-        else {
-            return 8
-        }
-        
+    
     }
     
     
+    var maxArmyCount: Int {
+        return self.bot.maxArmyCount
+    }
     
     
-    var charMaxCount: Int {
+    var maxCharCount: Int {
         return self.characters.count
     }
     
     
     
-    var lastLogin: Date = Date()
-    var token: String = ""
+   
 
     
     var weapons: [MMWeapon] = []
@@ -102,26 +110,30 @@ final class MMUser: JSONDeserializable {
     
     
     
-    var synchronizeQueue: [String: Any] = [:]
-    
-    
-    
-    
     var dict: [String : Any] {
+        
         return [kKey: self.key,
                 kLastLogin: self.lastLogin.description,
-                kVIPLevel: self.vipLevel,
-                kLevel: self.level,
-                kDungeonLevel: self.dungeonLevel,
-                "missionlevels": self.missionLevels,
+                kToken: self.token,
+                kDisplayeName: self.displayName,
+                "displaytitle": self.displayTitle,
+                "displayarea": self.displayArea,
+                
+                kSilver: self.silver,
+                kGold: self.gold,
+            
+                "title": self.title,
+                "area": area,
+                "day": self.day,
+                "movetoken": self.moveToken,
+
                 "ticket": self.ticket,
                 "gamestate": self.gameState,
-                "missioncompletecount": self.missionCompleteCount,
-                "displayname": self.displayName,
-                "displaytitle": self.displayTitle,
-                kPVPLevel: self.pvpLevel,
-                kSilver: self.silver,
-                kGold: self.gold]
+                "emotion": self.emotion,
+                
+                "maxmovetoken": self.maxMoveToken,
+                "maxarmycount": self.maxArmyCount]
+        
     }
     
     
@@ -131,18 +143,26 @@ final class MMUser: JSONDeserializable {
         let user = MMUser()
         user.key = json[kKey].stringValue
         user.lastLogin = Date()
-        user.vipLevel = json[kVIPLevel].intValue
-        user.level = json[kLevel].intValue
-        user.dungeonLevel = json[kDungeonLevel].intValue
-        user.missionLevels = json["missionlevels"].intArray!
-        user.ticket = json["ticket"].int ?? 0
-        user.gameState = json["gamestate"].int ?? 0
-        user.missionCompleteCount = json["missioncompletecount"].int ?? 0
-        user.displayName = json["displayname"].string ?? "联盟战士"
-        user.displayTitle = json["displaytitle"].string ?? "列兵"
-        user.pvpLevel = json[kPVPLevel].intValue
+        user.token = json[kToken].string!
+        user.displayName = json["displayname"].string ?? "麦田守望者"
+        user.displayTitle = json["displaytitle"].string ?? ""
+        user.displayArea = json["displayarea"].string ?? ""
+        
         user.silver = json[kSilver].intValue
         user.gold = json[kGold].intValue
+        
+        
+        user.title = json["title"].int ?? 0
+        user.area = json["area"].string ?? "area_1"
+        user.day = json["day"].int!
+        user.moveToken = json["movetoken"].int!
+        
+        
+        user.ticket = json["ticket"].int ?? 0
+        user.gameState = json["gamestate"].int ?? 0
+        user.emotion = json["emotion"].intArray ?? [0,0,0,0,0,0,0]
+        
+        
         return user
     }
     

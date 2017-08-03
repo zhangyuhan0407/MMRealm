@@ -26,6 +26,8 @@ struct MMDungeon {
 
     var boss: [String]! { return json["boss"].stringArray! }
     
+    var area: String { return json["area"].string! }
+    
     func characters(forBoss boss: String) -> [MMCharacter] {
         let array = json["characters"][boss].array!
         

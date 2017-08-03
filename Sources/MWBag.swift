@@ -119,7 +119,43 @@ class MMBagMiddleware: RouterMiddleware {
 
 
 
-
+class MMRewardMiddleware: RouterMiddleware {
+    
+    
+    func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) throws {
+        guard let key = request.parameters["key"] else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        guard let user = MMUserManager.sharedInstance.find(key: key) else {
+            try response.send(.ShouldLogin).end()
+            return
+        }
+        
+        guard let json = request.jsonBody else {
+            try response.send(OCTResponse.InputFormatError).end()
+            return
+        }
+        
+        
+        let rewards = json["rewards"].stringArray ?? []
+        
+        let ret = user.gainSlots(keys: rewards)
+        
+        try response.send(OCTResponse.Succeed(data: JSON(ret))).end()
+        
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+}
 
 
 

@@ -24,6 +24,10 @@ import OCTFoundation
     let INVPath =               "/home/ubuntu/Developer/MMFileServer/invs"
     let CardPath =              "/home/ubuntu/Developer/MMFileServer/cards"
     let ShopItemPath =          "/home/ubuntu/Developer/MMFileServer/ShopItems"
+    let AreaPath =              "/home/ubuntu/Developer/MMFileServer/areas"
+    let TitlePath =             "/home/ubuntu/Developer/MMFileServer/titles"
+    let InvestmentPath =        "/home/ubuntu/Developer/MMFileServer/investments"
+    let NPCPath =               "/home/ubuntu/Developer/MMFileServer/npcs/npcs"
 #else
     let BasePath =              "/Users/yorg/Developer/MMRealm"
     let UserCharRepoPath =      "/Users/yorg/Developer/MMRealm/UserCharRepo"
@@ -36,6 +40,10 @@ import OCTFoundation
     let INVPath =               "/Users/yorg/Developer/MMFileServer/invs"
     let CardPath =              "/Users/yorg/Developer/MMFileServer/cards"
     let ShopItemPath =          "/Users/yorg/Developer/MMFileServer/ShopItems"
+    let AreaPath =              "/Users/yorg/Developer/MMFileServer/areas"
+    let TitlePath =             "/Users/yorg/Developer/MMFileServer/titles"
+    let InvestmentPath =        "/Users/yorg/Developer/MMFileServer/investments"
+    let NPCPath =               "/Users/yorg/Developer/MMFileServer/npcs/npcs"
 #endif
 
 
@@ -108,6 +116,39 @@ extension Int {
         #else
             return Int(arc4random() % UInt32(max))
         #endif
+    }
+    
+    
+    public func wave(percent: Int) -> Int {
+        let random = 100 + (percent - Int.random(max: percent * 2))
+        let n = self.multiply(Float(random))
+        return n
+    }
+    
+    public static func random(count: Int, max: Int) -> [Int] {
+        var ret = [Int]()
+        
+        var flag = ret.count == count
+        while (flag == false) {
+            
+            let r = Int.random(max: max)
+            var isFound = false
+            for a in ret {
+                if a == r {
+                    isFound = true
+                    break
+                }
+            }
+            
+            if !isFound {
+                ret.append(r)
+            }
+            
+            
+            flag = ret.count == count
+        }
+        
+        return ret
     }
 }
 

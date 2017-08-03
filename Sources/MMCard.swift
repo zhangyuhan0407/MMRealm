@@ -132,7 +132,7 @@ func randomTalent(forCls cls: String) -> String {
     }
     else if cls.contains("QS") {
         if r < 33 {
-            realKey = "qs_shensheng"
+            realKey = "qs_zhiliao"
         } else if r < 66 {
             realKey = "qs_chengjie"
         } else {

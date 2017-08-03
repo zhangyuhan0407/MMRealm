@@ -25,7 +25,14 @@ class MMUserDAO {
         
         user.key = key
         
+        user.displayName = "雇佣兵"
         
+        user.gold = 2000
+        
+        
+        
+        
+        //Mail
         var mail = ENMail(key: UUID().description)
         mail.sour = "xxxx"
         mail.dest = user.key
@@ -80,6 +87,10 @@ class MMUserDAO {
     func saveInfo(forUser user: MMUser) {
         var json = user.infoJSON
         json["shopitems"] = user.shopItemJSON
+        json["missions"] = user.missionJSON
+        json["dungeons"] = user.dungeonJSON
+        json["investments"] = user.investmentsJSON
+        json["areas"] = user.areasJSON
         
         do {
             try json.description.write(toFile: "\(UserRepoPath)/\(user.key)", atomically: true, inAppendMode: false)
@@ -137,8 +148,22 @@ class MMUserDAO {
         
         user.shopItems = []
         for itemJSON in json["shopitems"].array! {
-            user.shopItems.append(ShopItem.deserialize(fromJSON: itemJSON))
+            user.shopItems.append(ENShopItem.deserialize(fromJSON: itemJSON))
         }
+        
+        
+        user.missions = []
+        let missionArray = json["missions"].array ?? []
+        for mm in missionArray {
+            user.missions.append(MYMission.deserialize(fromJSON: mm))
+        }
+
+        user.dungeons = []
+        let dungeonArray = json["dungeons"].array ?? []
+        for dd in dungeonArray {
+            user.dungeons.append(MYDungeon.deserialize(fromJSON: dd))
+        }
+        
         
         return user
         
@@ -176,7 +201,7 @@ class MMUserDAO {
             case "misc":
                 var temp = [MMMisc]()
                 for json in jsonArray {
-                    var misc = MMMisc.deserialize(fromJSON: json)
+                    let misc = MMMisc.deserialize(fromJSON: json)
                     misc.count = json["count"].int ?? 1
                     temp.append(misc)
                 }

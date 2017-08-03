@@ -55,6 +55,7 @@ enum MMRarity: CustomStringConvertible {
     case blue
     case purple
     case orange
+    case heriloom
     
     
     var description: String {
@@ -67,6 +68,8 @@ enum MMRarity: CustomStringConvertible {
             return "orange"
         case .purple:
             return "purple"
+        case .heriloom:
+            return "heriloom"
         default:
             return "white"
         }
@@ -85,6 +88,8 @@ enum MMRarity: CustomStringConvertible {
             return .purple
         case "white":
             return .white
+        case "heriloom":
+            return .heriloom
         default:
             fatalError()
         }

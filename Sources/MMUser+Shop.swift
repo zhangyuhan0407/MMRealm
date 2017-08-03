@@ -18,7 +18,7 @@ extension MMUser {
         
         for i in 0..<9 {
             
-            var item = ShopItem.random()
+            var item = ENShopItem.random()
             item.position = i
             self.shopItems.append(item)
         }
@@ -29,7 +29,7 @@ extension MMUser {
     
     
     
-    func findShopItem(item: ShopItem) -> ShopItem? {
+    func findShopItem(item: ENShopItem) -> ENShopItem? {
         for temp in shopItems {
             if temp.position == item.position {
                 return temp
@@ -40,8 +40,7 @@ extension MMUser {
     
     
     
-    func remove(shopItem: ShopItem) -> Bool {
-        
+    func remove(shopItem: ENShopItem) -> Bool {
         
         self.shopItems = self.shopItems.map {
             
@@ -69,18 +68,26 @@ extension MMUser {
 
 
 
-extension ShopItem {
+extension ENShopItem {
     
-    static func random() -> ShopItem {
-        let r = Int.random(max: 9) + 1
+    static func random() -> ENShopItem {
+        
+        
+        let r: Int
+        //isCard
+        if OORandom.happens(inPosibility: 15) {
+            r = Int.random(max: 9) + 101
+        }
+        else {
+            r = Int.random(max: 19) + 1
+        }
         
         let json = JSON.read(fromFile: "\(ShopItemPath)/shopitem_\(r)")!
         
-        let shopItem = ShopItem.deserialize(fromJSON: json)
+        let shopItem = ENShopItem.deserialize(fromJSON: json)
         
         return shopItem
-        
-        
+
     }
     
     

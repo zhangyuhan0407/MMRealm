@@ -18,28 +18,39 @@ extension MMUser {
         self.gameState = 1
         
         
-        self.silver = 1000
-        if self.ticket < 2 {
-            self.missionLevels = [99010011, 99020101, 99031001, 99049999]
-            
-            let json1 = JSON.read(fromFile: "\(ShopItemPath)/shopitem_108")!
-            let json2 = JSON.read(fromFile: "\(ShopItemPath)/shopitem_106")!
-            var item1 = ShopItem.deserialize(fromJSON: json1)
-            var item2 = ShopItem.deserialize(fromJSON: json2)
-            
-            item1.position = 0
-            item2.position = 1
-            
-            self.shopItems = [item1, item2]
-            
-            
-        }
-        else {
-            self.refreshMission()
-            _ = self.refreshShopItems()
-        }
+        self.silver = 5000
         
         
+//        if self.ticket < 2 {
+//            self.missionLevels = [99010011, 99020101, 99031001, 99049999]
+//            
+//            let json1 = JSON.read(fromFile: "\(ShopItemPath)/shopitem_108")!
+//            let json2 = JSON.read(fromFile: "\(ShopItemPath)/shopitem_106")!
+//            var item1 = ENShopItem.deserialize(fromJSON: json1)
+//            var item2 = ENShopItem.deserialize(fromJSON: json2)
+//            
+//            item1.position = 0
+//            item2.position = 1
+//            
+//            self.shopItems = [item1, item2]
+//            
+//            
+//        }
+//        else {
+//            self.title = self.rankTitle()
+//            self.day = 1
+//            self.moveToken = self.maxMoveToken
+//            _ = self.refreshShopItems()
+//        }
+        
+        self.title = self.rankTitle()
+        self.day = 1
+        self.moveToken = self.maxMoveToken
+        _ = self.refreshShopItems()
+        
+        
+        self.missions = [MYMission(key: "mission_1")]
+        self.dungeons = [MYDungeon(key: "dungeon_3")]
         
         
         return true
@@ -47,24 +58,36 @@ extension MMUser {
     }
     
     
+    @discardableResult
     func exitGameState() -> Bool {
         
         let user = self
         user.silver = 0
+        
         user.characters = []
         user.weapons = []
         user.armors = []
         user.trinkets = []
         user.miscs = []
         
-        user.displayTitle = "列兵"
+        user.title = 0
+        user.area = "area_1"
+        user.day = 0
+        user.moveToken = 0
+        
         user.gameState = 0
-        user.dungeonLevel = 0
-        user.missionLevels = []
+        
+        user.bot = ENBot()
+        
+        user.dungeons = []
+        user.missions = []
         user.shopItems = []
-        user.pvpLevel = 0
-        user.missionCompleteCount = 0
-        self.gameState = 0
+
+        
+        
+        for h in self.herilooms {
+            _ = self.add(inv: h)
+        }
         
         do {
             try MMUserDAO.sharedInstance.save(self)

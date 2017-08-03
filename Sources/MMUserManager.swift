@@ -34,7 +34,7 @@ class MMUserManager {
     
     
     func timeout(d1: Date, d2: Date) -> Bool {
-        if (d2 - 3600) > d1 {
+        if (d2 - 600) > d1 {
             return true
         }
         
@@ -52,15 +52,19 @@ class MMUserManager {
             }
         }
         
+        MMInvestmentRepo.sharedInstance.save()
+        
         sleep(60)
         self.looper()
     }
     
     
     
+    
     func find(key: String) -> MMUser? {
         for user in self.users {
             if user.key == key {
+                user.lastLogin = Date()
                 return user
             }
         }
@@ -91,6 +95,11 @@ class MMUserManager {
     }
     
     
+    
+    func randomOnlineUser() -> MMUser {
+        let r = Int.random(max: users.count)
+        return users[r]
+    }
     
     
     

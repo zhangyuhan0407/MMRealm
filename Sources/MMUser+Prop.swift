@@ -47,7 +47,44 @@ extension MMUser {
     }
     
     
+    @discardableResult
+    func add(day: Int) -> Bool {
+        self.day += day
+        return true
+    }
+    
+    
+    @discardableResult
+    func nextDay() -> Bool {
+        
+        self.add(day: 1)
+        
+        self.moveToken = self.maxMoveToken
+        
+        return true
+    }
+    
+    
+    
+    
+    
+    func remove(moveToken: Int) -> Bool {
+        if self.moveToken < moveToken {
+            return false
+        }
+        
+        self.moveToken -= moveToken
+        return true
+    }
+    
 }
+
+
+
+
+
+
+
 
 
 

@@ -16,6 +16,8 @@ import OCTFoundation
 
 
 extension MMUser {
+    
+    @discardableResult
     func add(inv: MMInventory) -> Bool {
         switch inv.category {
         case .weapon:
@@ -27,6 +29,11 @@ extension MMUser {
         case .misc:
             return add(misc: inv as! MMMisc, count: 1)
         }
+    }
+    
+    func add(heriloom: MMInventory) -> Bool {
+        self.herilooms.append(heriloom)
+        return self.add(inv: heriloom)
     }
     
     
@@ -120,7 +127,7 @@ extension MMUser {
     
     func remove(misc: MMMisc, count: Int) -> Bool {
         
-        if var m = find(misc: misc) {
+        if let m = find(misc: misc) {
             if m.count > misc.count {
                 m.decrease(count: count)
                 return true
@@ -209,6 +216,67 @@ extension MMUser {
         return nil
     }
 
+    
+    func has(inv: MMInventory) -> Bool {
+        for w in self.weapons {
+            if w.key == inv.key {
+                return true
+            }
+        }
+        
+        for a in self.armors {
+            if a.key == inv.key {
+                return true
+            }
+        }
+        
+        for t in self.trinkets {
+            if t.key == inv.key {
+                return true
+            }
+        }
+        
+        for m in self.miscs {
+            if m.key == inv.key {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    
+    func has(heriloom: MMInventory) -> Bool {
+        return has(inv: heriloom)
+    }
+    
+    func has(heriloom: String) -> Bool {
+        for w in self.weapons {
+            if w.key == heriloom {
+                return true
+            }
+        }
+        
+        for w in self.armors {
+            if w.key == heriloom {
+                return true
+            }
+        }
+        
+        for w in self.trinkets {
+            if w.key == heriloom {
+                return true
+            }
+        }
+        
+        for w in self.miscs {
+            if w.key == heriloom {
+                return true
+            }
+        }
+        
+        return false
+    }
     
 }
 

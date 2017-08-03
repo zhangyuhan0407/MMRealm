@@ -79,14 +79,49 @@ extension MMUser {
     
     
     var missionJSON: JSON {
-        let dict: [String: Any] = ["missionlevels": self.missionLevels, "missioncompletecount": missionCompleteCount]
-        return JSON(dict)
+        var json = [JSON]()
+        for m in self.missions {
+            json.append(m.json)
+        }
+        return JSON(json)
+    }
+    
+    
+    var dungeonJSON: JSON {
+        var json = [JSON]()
+        for d in self.dungeons {
+            json.append(d.json)
+        }
+        return JSON(json)
     }
     
     
     var mailsJSON: JSON {
-        return JSON(self.mails.map { $0.json })
+        var json = [JSON]()
+        for d in self.mails {
+            json.append(d.json)
+        }
+        return JSON(json)
     }
+    
+    
+    var investmentsJSON: JSON {
+        var json = [JSON]()
+        for d in self.investments {
+            json.append(d.json)
+        }
+        return JSON(json)
+    }
+    
+    
+    var areasJSON: JSON {
+        var json = [JSON]()
+        for d in self.areas {
+            json.append(d.json)
+        }
+        return JSON(json)
+    }
+    
     
     
     var json: JSON {
@@ -94,7 +129,11 @@ extension MMUser {
 
         json["bag"] = self.bagJSON
         json["chars"] = self.charsJSON
-
+        json["missions"] = self.missionJSON
+        json["dungeons"] = self.dungeonJSON
+        json["investments"] = investmentsJSON
+        json["areas"] = areasJSON
+        
         
         return json
     }

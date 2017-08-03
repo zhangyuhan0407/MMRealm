@@ -199,6 +199,38 @@ extension MMUser {
     
     
     
+    func add(card: String) -> Bool {
+        if self.has(charKey: card) {
+            return false
+        }
+        
+        let json = JSON.read(fromFile: "\(CardPath)/\(card)")!
+        let char = MMCharacter.deserialize(fromJSON: json)
+        return self.add(card: char)
+    }
+    
+    
+    func has(char: MMCharacter) -> Bool {
+        for c in self.characters {
+            if c.key == char.key {
+                return true
+            }
+        }
+        return false
+    }
+    
+    
+    func has(charKey: String) -> Bool {
+        for c in self.characters {
+            if c.key == charKey {
+                return true
+            }
+        }
+        return false
+    }
+    
+    
+    
 }
 
 

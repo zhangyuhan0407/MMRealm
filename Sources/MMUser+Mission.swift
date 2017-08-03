@@ -19,9 +19,8 @@ extension MMUser {
     
     func has(mission: Int) -> Bool {
         
-        let missionIndex = mission/1000000
-        for level in self.missionLevels {
-            if level/1000000 == missionIndex {
+        for m in self.missions {
+            if m.index == mission {
                 return true
             }
         }
@@ -30,11 +29,20 @@ extension MMUser {
     }
     
     
+    func findMission(index: Int) -> MYMission? {
+        for m in self.missions {
+            if m.index == index {
+                return m
+            }
+        }
+        return nil
+    }
     
-    private func remove(mission level: Int) -> Bool {
+    
+    func remove(mission level: Int) -> Bool {
         if has(mission: level) {
-            self.missionLevels = self.missionLevels.filter {
-                $0 != level
+            self.missions = self.missions.filter {
+                $0.index != level
             }
             return true
         }
@@ -44,7 +52,7 @@ extension MMUser {
     
     
     private func removeAllMission() {
-        self.missionLevels = []
+        self.missions = []
     }
     
     
@@ -53,24 +61,28 @@ extension MMUser {
     
     
     //添加任务
-    func add(mission: Int) -> Bool {
-        if self.missionLevels.count >= MaxMissionCount {
-            return false
+    func addMission() -> Int {
+        if self.missions.count >= MaxMissionCount {
+            return 0
         }
         
         //MissionIndex
         let missionIndex = Int.random(max: MaxMissionLevel) + 1
         
-        if self.has(mission: missionIndex * 1000000) {
-            _ = add(mission: 1)
-            return false
+        if self.has(mission: missionIndex) {
+            return addMission()
         }
         
         
+        let m = MYMission(key: "mission_\(missionIndex)")
+        
         //BossIndex
-        let bossIndex = self.armyMaxCount
         
+        m.bossIndex = self.maxArmyCount
+        m.rewardIndex = 0
+        self.missions.append(m)
         
+        return missionIndex
         
 //        //SlotIndex 
 //        //基础奖励
@@ -107,31 +119,40 @@ extension MMUser {
 //        }
         
         
-        var level = missionIndex * 1000000 + bossIndex * 10000 + 0
-        
-        self.missionLevels.append(level)
-        
-        return true
+//        var level = missionIndex * 1000000 + bossIndex * 10000 + 0
+//        
+//        self.missionLevels.append(level)
+//        
+//        return true
         
     }
     
     
     
-    
+    func addMission(key: String) -> Int {
+        let index = Int(key.components(separatedBy: "_").last!)!
+        if self.has(mission: index) {
+            return 0
+        }
+        
+        let m = MYMission(key: key)
+        self.missions.append(m)
+        return index
+    }
     
     
     
     //刷新任务
-    func refreshMission() -> Bool {
-        
-        removeAllMission()
-        
-        while self.missionLevels.count < MaxMissionCount {
-            add(mission: 1)
-        }
-        
-        return true
-    }
+//    func refreshMission() -> Bool {
+//        
+//        removeAllMission()
+//        
+//        while self.missionLevels.count < MaxMissionCount {
+//            add(mission: 1)
+//        }
+//        
+//        return true
+//    }
     
     
     
@@ -140,7 +161,7 @@ extension MMUser {
     func complete(mission level: Int) -> Bool {
         
         if remove(mission: level) {
-            self.missionCompleteCount += 1
+//            self.missionCompleteCount += 1
             return true
         }
         
@@ -148,40 +169,43 @@ extension MMUser {
     }
     
     
-    func levelOfMission(_ index: Int) -> Int {
-        
-        let skey = index%10000
-        if skey == 9999 {
-            return 5
-        }
-        else {
-            return "\(skey)".characters.count
-        }
-        
-    }
+//    func levelOfMission(_ index: Int) -> Int {
+//        
+//        let skey = index%10000
+//        if skey == 9999 {
+//            return 5
+//        }
+//        else {
+//            return "\(skey)".characters.count
+//        }
+//        
+//    }
     
     
     
     //升级任务
-    func upgrade(mission index: Int) -> Int {
+    func upgrade(mission index: Int) -> Bool {
         
-        if !remove(mission: index) {
+        guard let m = self.findMission(index: index) else {
             fatalError()
         }
         
         
-        let mkey = index/1000000
-        let bkey = (index%1000000)/10000
-        var skey: Int = 0
+        if remove(silver: 10) == false {
+            return false
+        }
         
-        let level = levelOfMission(index)
+        
+        var skey = m.rewardIndex
+        
+        let level = m.bossIndex
         
         
         switch level {
         case 1:
             let r = Int.random(max: 3) + 1
             //升级
-            if OORandom.happens(inPosibility: 80) {
+            if OORandom.happens(inPosibility: 100) {
                 skey = 10 + r
             }
             //降级
@@ -190,7 +214,7 @@ extension MMUser {
             }
         case 2:
             let r = Int.random(max: 3) + 1
-            if OORandom.happens(inPosibility: 60) {
+            if OORandom.happens(inPosibility: 100) {
                 skey = 100 + r
             }
             else {
@@ -198,7 +222,7 @@ extension MMUser {
             }
         case 3:
             let r = Int.random(max: 3) + 1
-            if OORandom.happens(inPosibility: 40) {
+            if OORandom.happens(inPosibility: 80) {
                 skey = 1000 + r
             }
             else {
@@ -206,28 +230,71 @@ extension MMUser {
             }
         case 4:
             let r = Int.random(max: 3) + 1
-            if OORandom.happens(inPosibility: 20) {
+            if OORandom.happens(inPosibility: 40) {
                 skey = 9999
             }
             else {
                 skey = r
             }
         case 5:
-            return index
+            return false
         default:
             fatalError()
         }
         
-        let m = mkey * 1000000 + bkey * 10000 + skey
         
-        self.missionLevels.append(m)
+        m.bossIndex += 1
+        m.rewardIndex = skey
         
-        return m
+        return true
         
     }
     
     
-    
+    func addEnemyPlayer() -> Int {
+        if self.missions.count >= MaxMissionCount {
+            return 0
+        }
+        
+        var index = 0
+        if !has(mission: 101) {
+            index = 101
+        }
+        
+        
+        if !has(mission: 102) {
+            index = 102
+        }
+        
+        
+        if !has(mission: 103) {
+            index = 103
+        }
+        
+        
+        if !has(mission: 104) {
+            index = 104
+        }
+        
+        
+        if !has(mission: 105) {
+            index = 105
+        }
+        
+        
+        if !has(mission: 106) {
+            index = 106
+        }
+        
+        let u = MMUserManager.sharedInstance.randomOnlineUser()
+        let m = MYMission(key: "mission_\(index)")
+        m.type = "pvp"
+        m.enemyUserKey = u.key
+        m.enemyUserDisplayName = u.displayName
+        
+        
+        return index
+    }
     
     
     

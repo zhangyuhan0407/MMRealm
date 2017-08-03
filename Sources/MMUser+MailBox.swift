@@ -45,6 +45,7 @@ extension MMUser {
     }
     
     
+    @discardableResult
     func add(mail: ENMail) -> Bool {
         if findMail(key: mail.key) != nil {
             return false

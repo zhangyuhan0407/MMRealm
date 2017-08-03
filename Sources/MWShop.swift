@@ -76,7 +76,7 @@ class MMShopMiddleware: RouterMiddleware {
         let itemJSON = json["item"]
         
         
-        let item = ShopItem.deserialize(fromJSON: itemJSON)
+        let item = ENShopItem.deserialize(fromJSON: itemJSON)
         
         if item.key == "PROP_Gold" {
             user.add(gold: item.count)
@@ -84,7 +84,7 @@ class MMShopMiddleware: RouterMiddleware {
             return
         }
         
-        user.remove(shopItem: item)
+        _ = user.remove(shopItem: item)
 
         let itemKey = item.key
         let price = item.price
@@ -125,10 +125,14 @@ class MMShopMiddleware: RouterMiddleware {
         }
         
         
-        user.refreshShopItems()
-        
-        
-        try response.send(OCTResponse.Succeed(data: user.shopItemJSON)).end()
+        let isSucceed = user.refreshShopItems()
+        if isSucceed {
+            _ = user.remove(silver: 50)
+            try response.send(OCTResponse.Succeed(data: user.shopItemJSON)).end()
+        }
+        else {
+            try response.send(OCTResponse.ServerError).end()
+        }
         
         
     }
